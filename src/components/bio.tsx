@@ -182,18 +182,18 @@ function LandscapeSection1() {
     offset: ["start start", "end start"]
   });
 
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 1.1]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0.95]);
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0]);
 
   return (
     <div ref={ref} className="h-full">
       <motion.div
         style={{ opacity }}
-        className="sticky top-0 h-screen flex items-center justify-center"
+        className="sticky top-0 h-screen flex items-center justify-center px-8 md:px-16 lg:px-32 py-16"
       >
         <motion.div 
           style={{ scale }}
-          className="relative h-screen w-full border-y border-[#D4AF37]/20 overflow-hidden"
+          className="relative h-[75vh] w-full max-w-7xl border border-[#D4AF37]/20 overflow-hidden"
         >
           <Image
             src="/photos/landscape1.JPG"
@@ -321,18 +321,18 @@ function LandscapeSection2() {
     offset: ["start start", "end start"]
   });
 
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 1.1]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0.95]);
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0]);
 
   return (
     <div ref={ref} className="h-full">
       <motion.div
         style={{ opacity }}
-        className="sticky top-0 h-screen flex items-center justify-center"
+        className="sticky top-0 h-screen flex items-center justify-center px-8 md:px-16 lg:px-32 py-16"
       >
         <motion.div 
           style={{ scale }}
-          className="relative h-screen w-full border-y border-[#D4AF37]/20 overflow-hidden"
+          className="relative h-[75vh] w-full max-w-7xl border border-[#D4AF37]/20 overflow-hidden"
         >
           <Image
             src="/photos/landscape2.JPG"
