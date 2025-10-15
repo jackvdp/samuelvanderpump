@@ -8,10 +8,10 @@ export default function Hero() {
   const [showHero, setShowHero] = useState(false);
 
   useEffect(() => {
-    // Show hero after opening sequence (4 seconds)
+    // Show hero after opening sequence (2.5 seconds)
     const timer = setTimeout(() => {
       setShowHero(true);
-    }, 4000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, []);
