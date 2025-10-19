@@ -8,10 +8,10 @@ export default function OpeningSequence() {
   const [showOpening, setShowOpening] = useState(true);
 
   useEffect(() => {
-    // Hide opening sequence after 2.5 seconds
+    // Hide opening sequence after 1 second
     const timer = setTimeout(() => {
       setShowOpening(false);
-    }, 2500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -27,13 +27,13 @@ export default function OpeningSequence() {
           <div className="w-full h-full flex items-center justify-center gap-0 px-8 md:px-16">
             {/* Portrait 1 - Left */}
             <motion.div
-              className="relative h-[85vh] flex-1 border-y border-l border-[#D4AF37]/30 overflow-hidden"
+              className="relative h-[85vh] flex-1 border-y border-l border-white/30 overflow-hidden"
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0, scale: 0.9 }}
               transition={{ 
-                initial: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 },
-                exit: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                initial: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0 },
+                exit: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
               }}
             >
               <Image
@@ -48,13 +48,13 @@ export default function OpeningSequence() {
 
             {/* Portrait 2 - Center (Larger) */}
             <motion.div
-              className="relative h-[90vh] flex-[1.3] border-y border-x border-[#D4AF37]/30 overflow-hidden mx-2 md:mx-4"
+              className="relative h-[90vh] flex-[1.3] border-y border-x border-white/30 overflow-hidden mx-2 md:mx-4"
               initial={{ y: 100, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -400, opacity: 0, scale: 0.85 }}
               transition={{ 
-                initial: { duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 },
-                exit: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.05 }
+                initial: { duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 },
+                exit: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.05 }
               }}
             >
               <Image
@@ -69,13 +69,13 @@ export default function OpeningSequence() {
 
             {/* Portrait 3 - Right */}
             <motion.div
-              className="relative h-[85vh] flex-1 border-y border-r border-[#D4AF37]/30 overflow-hidden"
+              className="relative h-[85vh] flex-1 border-y border-r border-white/30 overflow-hidden"
               initial={{ x: 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 300, opacity: 0, scale: 0.9 }}
               transition={{ 
-                initial: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 },
-                exit: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }
+                initial: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 },
+                exit: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }
               }}
             >
               <Image

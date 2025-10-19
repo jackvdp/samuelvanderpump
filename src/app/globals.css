@@ -8,9 +8,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-playfair);
   --font-mono: var(--font-playfair);
-  --color-gold: var(--gold);
-  --color-gold-light: var(--gold-light);
-  --color-gold-dark: var(--gold-dark);
   --radius-sm: 0;
   --radius-md: 0;
   --radius-lg: 0;
@@ -18,14 +15,9 @@
 }
 
 :root {
-  /* Black and Gold Theme */
+  /* Black and White Theme */
   --background: #000000;
   --foreground: #FFFFFF;
-  
-  /* Gold Colors */
-  --gold: #D4AF37;
-  --gold-light: #FFD700;
-  --gold-dark: #B8860B;
   
   /* Remove all rounded corners */
   --radius: 0;
@@ -44,27 +36,5 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-great-vibes);
     font-weight: 400;
-  }
-}
-
-@layer utilities {
-  .text-gold {
-    color: var(--gold);
-  }
-  
-  .text-gold-light {
-    color: var(--gold-light);
-  }
-  
-  .text-gold-dark {
-    color: var(--gold-dark);
-  }
-  
-  .border-gold {
-    border-color: var(--gold);
-  }
-  
-  .bg-gold {
-    background-color: var(--gold);
   }
 }
