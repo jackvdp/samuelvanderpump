@@ -36,25 +36,23 @@ export default function FixedBackground() {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
+    <div className="fixed inset-0 w-full h-full pointer-events-none z-0 flex items-center justify-end">
       <motion.div
-        className="absolute right-0 top-0 bottom-0 h-full"
-        initial={{ width: "100%" }}
-        animate={{ width: isScrolled ? "33.333%" : "100%" }}
+        className="relative h-full"
+        initial={{ width: "100vw" }}
+        animate={{ width: isScrolled ? "33.333vw" : "100vw" }}
         transition={{ 
-          duration: 1.5, 
-          ease: [0.25, 0.1, 0.25, 1] // Smooth easing
+          duration: 1.5,
+          ease: [0.25, 0.1, 0.25, 0.1] // Smooth easing
         }}
       >
-        <div className="relative w-full h-full">
-          <Image
-            src="/photos/portrait4.JPG"
-            alt="Samuel Vanderpump"
-            fill
-            className="object-cover object-center"
-            priority
-          />
-        </div>
+        <Image
+          src="/photos/portraitHero.JPG"
+          alt="Samuel Vanderpump"
+          fill
+          className="object-cover object-center"
+          priority
+        />
       </motion.div>
     </div>
   );
