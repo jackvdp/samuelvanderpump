@@ -2,6 +2,7 @@ import OpeningSequence from "@/components/opening-sequence";
 import FixedBackground from "@/components/fixed-background";
 import Hero from "@/components/hero";
 import Navigation from "@/components/navigation";
+import ContentSections from "@/components/content-sections";
 
 export default function Home() {
   return (
@@ -20,9 +21,8 @@ export default function Home() {
         {/* Hero - Scrolls away normally, contains About */}
         <Hero />
         
-        {/* Additional content areas */}
-        <div className="min-h-screen" />
-        <div className="min-h-screen" />
+        {/* Content Sections - All other sections */}
+        <ContentSections />
       </div>
     </>
   );

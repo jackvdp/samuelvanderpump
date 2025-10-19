@@ -21,7 +21,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative z-20 min-h-screen flex flex-col justify-between pl-16 pr-32 pt-32 md:pt-40 pb-8">
+    <section className="relative z-20 min-h-screen flex flex-col justify-between pl-16 pr-16 pt-32 md:pt-40 pb-8">
       {/* Hero Text - Top Left */}
       <div className="text-left">
         {/* Samuel - Instrument Serif 400 Italic */}

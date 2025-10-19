@@ -10,6 +10,7 @@ export const websiteContent = {
     title: "Vanderpump FX",
     logo: "/logos/vanderpumpfx.png", // Add logo later
     link: "https://vanderpumpfx.com", // Update with actual URL
+    role: "Founder & CEO",
     description: "Vanderpump FX is a leading currency exchange brokerage specialising in competitive rates and personalised service for individuals and businesses. The company provides expert guidance on foreign exchange transactions, helping clients navigate international markets with confidence and secure optimal exchange rates for their currency needs."
   },
 
