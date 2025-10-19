@@ -1,10 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import SectionCard from "./section-card";
 import { contentSections } from "@/data/content";
 import Image from "next/image";
 
 export default function ContentSections() {
+  const [showSections, setShowSections] = useState(false);
+
+  useEffect(() => {
+    // Show sections after opening sequence (same timing as Hero)
+    const timer = setTimeout(() => {
+      setShowSections(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!showSections) {
+    return null;
+  }
+
   return (
     <div className="relative z-10 space-y-24 pb-32">
       {contentSections.map((section, index) => (

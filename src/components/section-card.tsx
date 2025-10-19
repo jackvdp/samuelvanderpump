@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { motion, useInView } from "framer-motion";
+import { ReactNode, useRef } from "react";
 
 interface SectionCardProps {
   number: string;
@@ -15,16 +15,19 @@ export default function SectionCard({
   number, 
   title, 
   children, 
-  delay = 0.3,
+  delay = 0,
   width = "66.666%"
 }: SectionCardProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1, margin: "0px 0px -200px 0px" });
+
   return (
-    <div className="pr-16" style={{ width }}>
+    <div ref={ref} className="pr-16" style={{ width }}>
       {/* Animated top line */}
       <motion.div
         className="w-full h-[3px] bg-white mb-8"
         initial={{ width: 0 }}
-        animate={{ width: "100%" }}
+        animate={isInView ? { width: "100%" } : { width: 0 }}
         transition={{ 
           duration: 1, 
           ease: [0.22, 1, 0.36, 1],
@@ -36,7 +39,7 @@ export default function SectionCard({
       <motion.div
         className="flex items-start gap-8"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ 
           duration: 0.8, 
           delay: delay + 0.5,
