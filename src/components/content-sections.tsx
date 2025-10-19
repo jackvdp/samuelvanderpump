@@ -4,6 +4,14 @@ import SectionCard from "./section-card";
 import { contentSections } from "@/data/content";
 import Image from "next/image";
 import { useOpeningDelay } from "@/hooks/use-opening-delay";
+import { SiInstagram, SiLinkedin, SiTiktok, SiFacebook } from "react-icons/si";
+
+const socialIconMap = {
+  Instagram: SiInstagram,
+  LinkedIn: SiLinkedin,
+  TikTok: SiTiktok,
+  Facebook: SiFacebook,
+};
 
 export default function ContentSections() {
   const showSections = useOpeningDelay();
@@ -203,6 +211,27 @@ export default function ContentSections() {
                 >
                   {section.email}
                 </a>
+              )}
+
+              {/* Social Links (if exists - Contact section) */}
+              {section.socialLinks && section.socialLinks.length > 0 && (
+                <div className="flex items-center gap-4 pt-4">
+                  {section.socialLinks.map((social) => {
+                    const Icon = socialIconMap[social.platform as keyof typeof socialIconMap];
+                    return Icon ? (
+                      <a
+                        key={social.platform}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white hover:opacity-70 transition-opacity"
+                        aria-label={social.platform}
+                      >
+                        <Icon className="w-6 h-6" />
+                      </a>
+                    ) : null;
+                  })}
+                </div>
               )}
             </div>
           </SectionCard>

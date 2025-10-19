@@ -67,7 +67,13 @@ export const contentSections = [
     number: "05",
     title: "Contact",
     email: "hello@samuelvanderpump.com",
-    description: "For business enquiries, media requests, or charitable partnership opportunities, please get in touch."
+    description: "For business enquiries, media requests, or charitable partnership opportunities, please get in touch.",
+    socialLinks: [
+      { platform: "Instagram", url: "https://www.instagram.com/samvanderpump?igsh=ZXFjN3l1eHBjczk0&utm_source=qr" },
+      { platform: "LinkedIn", url: "https://www.linkedin.com/in/samuel-vanderpump-520660110?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" },
+      { platform: "TikTok", url: "https://www.tiktok.com/@sam_vanderpump?_t=ZN-90gj6HPu0MJ&_r=1" },
+      { platform: "Facebook", url: "https://www.facebook.com/share/1GbjL4uGQw/?mibextid=wwXIfr" },
+    ]
   }
 ];
 
