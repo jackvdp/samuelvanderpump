@@ -16,7 +16,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Samuel Vanderpump",
+  title: "Samuel Vanderpump | Entrepreneur · Finance · Media Personality",
   description: "Entrepreneur · Innovator · Philanthropist",
   icons: {
     icon: [
