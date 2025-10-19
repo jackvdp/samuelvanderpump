@@ -19,7 +19,7 @@ export default function About() {
 
       {/* Content */}
       <motion.div
-        className="flex items-start gap-4"
+        className="flex items-start gap-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ 
@@ -67,7 +67,7 @@ export default function About() {
               lineHeight: "1.6",
             }}
           >
-            Samuel Vanderpump is a visionary entrepreneur and philanthropist dedicated to innovation and positive global impact. With a career spanning technology, sustainable development, and social enterprise, Samuel has pioneered initiatives that bridge the gap between cutting-edge innovation and meaningful societal change.
+            Samuel Vanderpump is CEO and Founder of Vanderpump FX, specialising in finance and foreign exchange. Beyond his work in finance, Samuel serves as an ambassador for charitable organisations, and is recognised as a television personality and podcast host, connecting with audiences on topics spanning business, culture, and philanthropy.
           </p>
         </div>
       </motion.div>
