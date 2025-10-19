@@ -3,6 +3,7 @@ import FixedBackground from "@/components/fixed-background";
 import Hero from "@/components/hero";
 import Navigation from "@/components/navigation";
 import ContentSections from "@/components/content-sections";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
@@ -23,6 +24,9 @@ export default function Home() {
         
         {/* Content Sections - All other sections */}
         <ContentSections />
+
+        {/* Footer */}
+        <Footer />
       </div>
     </>
   );

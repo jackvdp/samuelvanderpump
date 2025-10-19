@@ -22,9 +22,9 @@ export default function ContentSections() {
   }
 
   return (
-    <div className="relative z-10 space-y-24 pb-32">
+    <div className="relative z-10 pb-32">
       {contentSections.map((section, index) => (
-        <section key={index} className="px-8 md:px-16" data-section={section.id}>
+        <section key={index} className="px-8 md:px-16 pb-24" data-section={section.id}>
           <SectionCard 
             number={section.number}
             title={section.title}
@@ -39,7 +39,7 @@ export default function ContentSections() {
                   rel="noopener noreferrer"
                   className="inline-block"
                 >
-                  <div className="relative w-32 h-32 mb-4">
+                  <div className="relative w-64 h-64 mb-4">
                     <Image
                       src={section.logo}
                       alt={section.title}

@@ -25,7 +25,7 @@ export default function Navigation() {
 
   return (
     <nav className="fixed inset-0 pointer-events-none z-50">
-      <div className="absolute top-0 left-0 right-0 flex items-start justify-between pr-16 pl-16 pt-8">
+      <div className="absolute top-0 left-0 right-0 flex items-start justify-between pr-16 pl-16 pt-4">
         {/* Top Left - Samuel Vanderpump */}
         <div className="pointer-events-auto">
           <NavItem>Samuel Vanderpump</NavItem>
@@ -38,7 +38,7 @@ export default function Navigation() {
       </div>
 
       {/* Bottom Right - Scroll indicator */}
-      <div className="absolute bottom-0 right-0 pr-16 pb-8">
+      <div className="absolute bottom-0 right-0 pr-16 pb-4">
         <div className="pointer-events-auto">
           {isScrolled ? (
             <NavItem onClick={scrollToTop}>Back to top</NavItem>
