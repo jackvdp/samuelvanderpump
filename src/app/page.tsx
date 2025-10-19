@@ -1,5 +1,6 @@
 import OpeningSequence from "@/components/opening-sequence";
 import FixedBackground from "@/components/fixed-background";
+import Hero from "@/components/hero";
 
 export default function Home() {
   return (
@@ -7,12 +8,15 @@ export default function Home() {
       {/* Opening Sequence - Three Portraits */}
       <OpeningSequence />
       
-      {/* Fixed Background Image - Scales from fill to fit on scroll */}
+      {/* Fixed Background Image - Stays in place */}
       <FixedBackground />
       
-      {/* Content area with black background for scrolling */}
-      <div className="relative z-10 min-h-[300vh] bg-transparent">
-        <div className="min-h-screen" />
+      {/* Scrollable Content */}
+      <div className="relative z-10">
+        {/* Hero - Scrolls away normally */}
+        <Hero />
+        
+        {/* Additional content areas */}
         <div className="min-h-screen" />
         <div className="min-h-screen" />
       </div>

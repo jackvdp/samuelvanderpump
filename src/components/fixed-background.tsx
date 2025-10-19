@@ -47,7 +47,7 @@ export default function FixedBackground() {
         }}
       >
         <Image
-          src="/photos/portraitHero.JPG"
+          src="/photos/portraitHero5.JPG"
           alt="Samuel Vanderpump"
           fill
           className="object-cover object-center"
