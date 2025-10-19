@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import { Herr_Von_Muellerhoff, Playfair_Display } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const herrVonMuellerhoff = Herr_Von_Muellerhoff({
-  weight: "400",
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-great-vibes",
+  variable: "--font-inter",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  weight: ["400", "500", "600", "700", "900"],
+const instrumentSerif = Instrument_Serif({
+  weight: ["400"],
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -27,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${herrVonMuellerhoff.variable} ${playfair.variable}`}>
-      <body className={playfair.className}>{children}</body>
+    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
