@@ -35,11 +35,13 @@ export const contentSections = [
       {
         name: "Made in Chelsea",
         network: "E4",
+        logo: "/logos/mic.png",
         description: "Featured cast member on the award-winning reality series chronicling the lives of affluent young people in West London."
       },
       {
         name: "Vanderpump Villa",
         network: "Hulu",
+        logo: "/logos/vanderpumpvilla.webp",
         description: "Reality series following the operations of an exclusive French chateau, showcasing luxury hospitality and interpersonal dynamics."
       }
     ]

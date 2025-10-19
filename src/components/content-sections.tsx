@@ -102,6 +102,19 @@ export default function ContentSections() {
                 <div className="space-y-6">
                   {section.shows.map((show, showIndex) => (
                     <div key={showIndex} className="space-y-2">
+                      {/* Logo (if exists) */}
+                      {show.logo && (
+                        <div className="mb-4">
+                          <Image
+                            src={show.logo}
+                            alt={show.name}
+                            width={128}
+                            height={128}
+                            className="object-contain w-32 h-auto"
+                          />
+                        </div>
+                      )}
+
                       <div className="flex items-baseline gap-2">
                         <h4
                           className="text-white"
