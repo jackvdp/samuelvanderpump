@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import NavItem from "./nav-item";
+import { SiInstagram, SiLinkedin, SiTiktok, SiFacebook } from "react-icons/si";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,6 +33,13 @@ export default function Navigation() {
     }
   };
 
+  const socialLinks = [
+    { icon: SiInstagram, href: "https://www.instagram.com/samvanderpump?igsh=ZXFjN3l1eHBjczk0&utm_source=qr", label: "Instagram" },
+    { icon: SiLinkedin, href: "https://www.linkedin.com/in/samuel-vanderpump-520660110?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app", label: "LinkedIn" },
+    { icon: SiTiktok, href: "https://www.tiktok.com/@sam_vanderpump?_t=ZN-90gj6HPu0MJ&_r=1", label: "TikTok" },
+    { icon: SiFacebook, href: "https://www.facebook.com/share/1GbjL4uGQw/?mibextid=wwXIfr", label: "Facebook" },
+  ];
+
   return (
     <nav className="fixed inset-0 pointer-events-none z-50">
       <div className="absolute top-0 left-0 right-0 flex items-start justify-between px-8 md:px-16 pt-4">
@@ -40,9 +48,25 @@ export default function Navigation() {
           <NavItem>Samuel Vanderpump</NavItem>
         </div>
 
-        {/* Top Right - Contact */}
-        <div className="pointer-events-auto">
+        {/* Top Right - Contact & Social Icons */}
+        <div className="pointer-events-auto flex items-center gap-6">
           <NavItem href="mailto:hello@samuelvanderpump.com">Contact</NavItem>
+          
+          {/* Social Media Icons */}
+          <div className="flex items-center gap-4">
+            {socialLinks.map((social) => (
+              <a
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:opacity-70 transition-opacity"
+                aria-label={social.label}
+              >
+                <social.icon className="w-5 h-5" />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
 
