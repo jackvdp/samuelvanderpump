@@ -1,27 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 import About from "./about";
+import { useOpeningDelay } from "@/hooks/use-opening-delay";
 
 export default function Hero() {
-  const [showHero, setShowHero] = useState(false);
-
-  useEffect(() => {
-    // Show hero after opening sequence (1 second)
-    const timer = setTimeout(() => {
-      setShowHero(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const showHero = useOpeningDelay();
 
   if (!showHero) {
     return null;
   }
 
   return (
-    <section className="relative z-20 min-h-screen flex flex-col justify-between pl-16 pr-16 pt-32 md:pt-40 pb-8">
+    <section className="relative z-20 min-h-screen flex flex-col justify-between px-8 md:px-16 pt-32 md:pt-40 pb-4 md:pb-16">
       {/* Hero Text - Top Left */}
       <div className="text-left">
         {/* Samuel - Instrument Serif 400 Italic */}

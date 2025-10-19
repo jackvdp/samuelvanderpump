@@ -6,15 +6,32 @@ import { useState, useEffect } from "react";
 
 export default function OpeningSequence() {
   const [showOpening, setShowOpening] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Hide opening sequence after 1 second
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // Hide opening sequence after 1 second (desktop only)
     const timer = setTimeout(() => {
       setShowOpening(false);
     }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
+
+  // Don't show opening sequence on mobile
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <AnimatePresence>

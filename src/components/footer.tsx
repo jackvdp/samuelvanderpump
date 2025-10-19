@@ -1,20 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 import NavItem from "./nav-item";
+import { useOpeningDelay } from "@/hooks/use-opening-delay";
 
 export default function Footer() {
-  const [showFooter, setShowFooter] = useState(false);
-
-  useEffect(() => {
-    // Show footer after opening sequence (same timing as Hero and ContentSections)
-    const timer = setTimeout(() => {
-      setShowFooter(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const showFooter = useOpeningDelay();
 
   if (!showFooter) {
     return null;

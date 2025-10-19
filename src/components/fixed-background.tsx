@@ -3,20 +3,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useOpeningDelay } from "@/hooks/use-opening-delay";
 
 export default function FixedBackground() {
-  const [showBackground, setShowBackground] = useState(false);
+  const showBackground = useOpeningDelay();
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentImage, setCurrentImage] = useState("/photos/portraitHero1.JPG");
-
-  useEffect(() => {
-    // Show background after opening sequence (1 second)
-    const timer = setTimeout(() => {
-      setShowBackground(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     // Detect scroll position and toggle width + change images based on section
