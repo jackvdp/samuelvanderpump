@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 export default function About() {
   return (
     <div className="w-2/3 pr-16">
-      {/* Animated top line - doubled height */}
+      {/* Animated top line - thicker */}
       <motion.div
-        className="w-full h-[2px] bg-white mb-8"
+        className="w-full h-[3px] bg-white mb-8"
         initial={{ width: 0 }}
         animate={{ width: "100%" }}
         transition={{ 
@@ -62,7 +62,7 @@ export default function About() {
           <p
             style={{
               fontFamily: "var(--font-inter)",
-              fontWeight: 400,
+              fontWeight: 500,
               fontSize: "16px",
               lineHeight: "1.6",
             }}

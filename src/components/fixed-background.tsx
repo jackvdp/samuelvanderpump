@@ -42,12 +42,12 @@ export default function FixedBackground() {
         initial={{ width: "100vw" }}
         animate={{ width: isScrolled ? "33.333vw" : "100vw" }}
         transition={{ 
-          duration: 1.5,
+          duration: 1.0,
           ease: [0.25, 0.1, 0.25, 0.1] // Smooth easing
         }}
       >
         <Image
-          src="/photos/portraitHero5.JPG"
+          src="/photos/portraitHero1.JPG"
           alt="Samuel Vanderpump"
           fill
           className="object-cover object-center"
