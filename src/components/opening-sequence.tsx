@@ -20,7 +20,7 @@ export default function OpeningSequence() {
     <AnimatePresence>
       {showOpening && (
         <motion.div
-          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
         >

@@ -35,7 +35,7 @@ export default function Hero() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={{ 
-              duration: 1.5, 
+              duration: 2,
               ease: [0.22, 1, 0.36, 1],
               delay: 0.3
             }}
@@ -57,7 +57,7 @@ export default function Hero() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={{ 
-              duration: 1.5, 
+              duration: 2,
               ease: [0.22, 1, 0.36, 1],
               delay: 0.3
             }}
