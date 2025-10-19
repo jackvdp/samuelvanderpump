@@ -8,14 +8,29 @@ import { useOpeningDelay } from "@/hooks/use-opening-delay";
 export default function FixedBackground() {
   const showBackground = useOpeningDelay();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [currentImage, setCurrentImage] = useState("/photos/portraitHero1.JPG");
+
+  useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   useEffect(() => {
     // Detect scroll position and toggle width + change images based on section
     const handleScroll = () => {
       const scrollY = window.scrollY;
       
-      // Toggle width animation
+      // Toggle width animation (desktop only)
       if (scrollY > 1) {
         setIsScrolled(true);
       } else {
@@ -62,9 +77,11 @@ export default function FixedBackground() {
   return (
     <div className="fixed inset-0 w-full h-full pointer-events-none z-0 flex items-center justify-end">
       <motion.div
-        className="relative h-full"
+        className="relative h-full w-full"
         initial={{ width: "100vw" }}
-        animate={{ width: isScrolled ? "33.333vw" : "100vw" }}
+        animate={{ 
+          width: isMobile ? "100vw" : (isScrolled ? "33.333vw" : "100vw")
+        }}
         transition={{ 
           duration: 1.0,
           ease: [0.25, 0.1, 0.25, 0.1]
@@ -100,6 +117,14 @@ export default function FixedBackground() {
           {/* Bottom edge - dark to transparent */}
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
         </div>
+
+        {/* Mobile darkening overlay */}
+        <motion.div
+          className="absolute inset-0 bg-black pointer-events-none md:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isScrolled ? 0.7 : 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        />
       </motion.div>
     </div>
   );
