@@ -1,29 +1,31 @@
-export const websiteContent = {
-  about: {
-    number: "00",
-    title: "About",
-    description: "Samuel Vanderpump is CEO and Founder of Vanderpump FX, specialising in finance and foreign exchange. Beyond his work in finance, Samuel serves as an ambassador for charitable organisations, and is recognised as a television personality and podcast host, connecting with audiences on topics spanning business, culture, and philanthropy."
-  },
+// About section is separate and used in Hero component
+export const aboutContent = {
+  number: "00",
+  title: "About",
+  description: "Samuel Vanderpump is CEO and Founder of Vanderpump FX, specialising in finance and foreign exchange. Beyond his work in finance, Samuel serves as an ambassador for charitable organisations, and is recognised as a television personality and podcast host, connecting with audiences on topics spanning business, culture, and philanthropy."
+};
 
-  vanderpumpFX: {
+// Main content sections as an array
+export const contentSections = [
+  {
     number: "01",
     title: "Vanderpump FX",
-    logo: "/logos/vanderpumpfx.png", // Add logo later
-    link: "https://vanderpumpfx.com", // Update with actual URL
+    logo: "/logos/vanderpumpfx.png",
+    link: "https://vanderpumpfx.com",
+    linkText: "Visit Vanderpump FX",
     role: "Founder & CEO",
     description: "Vanderpump FX is a leading currency exchange brokerage specialising in competitive rates and personalised service for individuals and businesses. The company provides expert guidance on foreign exchange transactions, helping clients navigate international markets with confidence and secure optimal exchange rates for their currency needs."
   },
-
-  vanderpod: {
+  {
     number: "02",
     title: "Vanderpod",
-    logo: "/logos/vanderpod.jpg", // Add logo later
-    link: "https://vanderpod.com", // Update with actual URL
+    logo: "/logos/vanderpod.jpg",
+    link: "https://vanderpod.com",
+    linkText: "Listen to Vanderpod",
     role: "Founder & Presenter",
     description: "Vanderpod is a podcast exploring the intersection of business, culture, and lifestyle. As founder and presenter, Samuel brings compelling conversations with entrepreneurs, innovators, and thought leaders, offering insights into the challenges and triumphs of building successful ventures while maintaining authenticity and purpose."
   },
-
-  television: {
+  {
     number: "03",
     title: "Television",
     shows: [
@@ -39,8 +41,7 @@ export const websiteContent = {
       }
     ]
   },
-
-  charity: {
+  {
     number: "04",
     title: "Charitable Work",
     ambassadorships: [
@@ -57,14 +58,13 @@ export const websiteContent = {
       }
     ]
   },
-
-  contact: {
+  {
     number: "05",
     title: "Contact",
     email: "info@samuelvanderpump.com",
     description: "For business enquiries, media requests, or charitable partnership opportunities, please get in touch."
   }
-};
+];
 
-// Type definitions for better TypeScript support
-export type ContentSection = keyof typeof websiteContent;
+// TypeScript types
+export type ContentSection = typeof contentSections[number];
