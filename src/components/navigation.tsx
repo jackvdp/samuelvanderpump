@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import NavItem from "./nav-item";
-import { SiInstagram, SiLinkedin, SiTiktok, SiFacebook } from "react-icons/si";
+import {SiInstagram, SiLinkedin, SiTiktok, SiFacebook, SiYoutube} from "react-icons/si";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,6 +38,7 @@ export default function Navigation() {
     { icon: SiLinkedin, href: "https://www.linkedin.com/in/samuel-vanderpump-520660110?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app", label: "LinkedIn" },
     { icon: SiTiktok, href: "https://www.tiktok.com/@sam_vanderpump?_t=ZN-90gj6HPu0MJ&_r=1", label: "TikTok" },
     { icon: SiFacebook, href: "https://www.facebook.com/share/1GbjL4uGQw/?mibextid=wwXIfr", label: "Facebook" },
+    { icon: SiYoutube, url: "https://youtube.com/@vanderpodofficial?si=6h4zXKH2vTt5jvS0", label: "Youtube" },
   ];
 
   return (

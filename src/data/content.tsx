@@ -22,7 +22,7 @@ export const contentSections = [
     number: "03",
     title: "Vanderpod",
     logo: "/logos/vanderpod.jpg",
-    link: "/404",
+    link: "https://youtube.com/@vanderpodofficial?si=6h4zXKH2vTt5jvS0",
     linkText: "Listen to Vanderpod",
     role: "Founder & Presenter",
     description: "Vanderpod is a podcast exploring the intersection of business, culture, and lifestyle. As founder and presenter, Samuel brings compelling conversations with entrepreneurs, innovators, and thought leaders, offering insights into the challenges and triumphs of building successful ventures while maintaining authenticity and purpose."
@@ -77,6 +77,7 @@ export const contentSections = [
       { platform: "LinkedIn", url: "https://www.linkedin.com/in/samuel-vanderpump-520660110?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" },
       { platform: "TikTok", url: "https://www.tiktok.com/@sam_vanderpump?_t=ZN-90gj6HPu0MJ&_r=1" },
       { platform: "Facebook", url: "https://www.facebook.com/share/1GbjL4uGQw/?mibextid=wwXIfr" },
+      { platform: "Youtube", url: "https://youtube.com/@vanderpodofficial?si=6h4zXKH2vTt5jvS0" },
     ]
   }
 ];

@@ -50,7 +50,7 @@ export default function OpeningSequence() {
               exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
-                src="/photos/gladiator.jpg"
+                src="/photos/chelsea.jpg"
                 alt="Samuel Vanderpump"
                 fill
                 className="object-cover object-center"

@@ -4,13 +4,14 @@ import SectionCard from "./section-card";
 import { contentSections } from "@/data/content";
 import Image from "next/image";
 import { useOpeningDelay } from "@/hooks/use-opening-delay";
-import { SiInstagram, SiLinkedin, SiTiktok, SiFacebook } from "react-icons/si";
+import {SiInstagram, SiLinkedin, SiTiktok, SiFacebook, SiYoutube} from "react-icons/si";
 
 const socialIconMap = {
   Instagram: SiInstagram,
   LinkedIn: SiLinkedin,
   TikTok: SiTiktok,
   Facebook: SiFacebook,
+  Youtube: SiYoutube,
 };
 
 export default function ContentSections() {
