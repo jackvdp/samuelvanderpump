@@ -18,12 +18,11 @@ export default function Hero() {
         {/* Samuel - Instrument Serif 400 Italic */}
         <div className="overflow-hidden">
           <motion.h1 
-            className="text-white leading-none"
+            className="text-white leading-none text-[40px] md:text-[150px]"
             style={{
               fontFamily: "var(--font-instrument-serif)",
               fontStyle: "italic",
               fontWeight: 400,
-              fontSize: "150px",
             }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -40,12 +39,11 @@ export default function Hero() {
         {/* Vanderpump - Inter 700 */}
         <div className="overflow-hidden">
           <motion.h2 
-            className="text-white leading-none"
+            className="text-white leading-none text-[40px] md:text-[150px]"
             style={{
               fontFamily: "var(--font-inter)",
               fontStyle: "normal",
               fontWeight: 700,
-              fontSize: "150px",
             }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -61,7 +59,9 @@ export default function Hero() {
       </div>
 
       {/* About - Bottom Left */}
-      <About />
+      <div className={"pt-24"}>
+        <About />
+      </div>
     </section>
   );
 }
