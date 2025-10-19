@@ -18,16 +18,18 @@ export default function FixedBackground() {
   }, []);
 
   useEffect(() => {
-    // Detect scroll and trigger width change
+    // Detect scroll position and toggle width
     const handleScroll = () => {
-      if (window.scrollY > 10 && !isScrolled) {
+      if (window.scrollY > 10) {
         setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isScrolled]);
+  }, []);
 
   if (!showBackground) {
     return null;
