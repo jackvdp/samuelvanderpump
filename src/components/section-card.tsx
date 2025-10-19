@@ -34,8 +34,8 @@ export default function SectionCard({
             initial={{ width: 0 }}
             animate={isInView ? { width: "100%" } : { width: 0 }}
             transition={{ 
-              duration: 1, 
-              ease: [0.22, 1, 0.36, 1],
+              duration: 0.5,
+              ease: "linear",
               delay
             }}
           />
@@ -49,8 +49,8 @@ export default function SectionCard({
               initial={{ width: 0 }}
               animate={isInView ? { width: "250px" } : { width: 0 }}
               transition={{ 
-                duration: 1, 
-                ease: [0.22, 1, 0.36, 1],
+                duration: 0.5,
+                ease: "linear",
                 delay
               }}
             />
@@ -60,9 +60,9 @@ export default function SectionCard({
               initial={{ width: 0 }}
               animate={isInView ? { width: "100%" } : { width: 0 }}
               transition={{ 
-                duration: 1, 
-                ease: [0.22, 1, 0.36, 1],
-                delay: delay + 0.2
+                duration: 0.5,
+                ease: "linear",
+                delay
               }}
             />
           </>
