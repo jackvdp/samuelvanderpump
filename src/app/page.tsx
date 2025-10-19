@@ -17,7 +17,7 @@ export default function Home() {
       
       {/* Scrollable Content */}
       <div className="relative z-10">
-        {/* Hero - Scrolls away normally */}
+        {/* Hero - Scrolls away normally, contains About */}
         <Hero />
         
         {/* Additional content areas */}

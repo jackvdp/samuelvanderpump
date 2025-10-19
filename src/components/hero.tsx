@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import About from "./about";
 
 export default function Hero() {
   const [showHero, setShowHero] = useState(false);
@@ -20,7 +21,8 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative z-20 min-h-screen flex items-start p-8 md:p-16 pt-32 md:pt-40">
+    <section className="relative z-20 min-h-screen flex flex-col justify-between p-8 md:p-16 pt-32 md:pt-40">
+      {/* Hero Text - Top Left */}
       <div className="text-left">
         {/* Samuel - Instrument Serif 400 Italic */}
         <div className="overflow-hidden">
@@ -35,7 +37,7 @@ export default function Hero() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={{ 
-              duration: 2,
+              duration: 1.5, 
               ease: [0.22, 1, 0.36, 1],
               delay: 0.3
             }}
@@ -57,7 +59,7 @@ export default function Hero() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={{ 
-              duration: 2,
+              duration: 1.5, 
               ease: [0.22, 1, 0.36, 1],
               delay: 0.3
             }}
@@ -66,6 +68,9 @@ export default function Hero() {
           </motion.h2>
         </div>
       </div>
+
+      {/* About - Bottom Left */}
+      <About />
     </section>
   );
 }
