@@ -8,6 +8,7 @@ export const aboutContent = {
 // Main content sections as an array
 export const contentSections = [
   {
+    id: "vanderpump-fx",
     number: "01",
     title: "Vanderpump FX",
     logo: "/logos/vanderpumpfx.png",
@@ -17,6 +18,7 @@ export const contentSections = [
     description: "Vanderpump FX is a leading currency exchange brokerage specialising in competitive rates and personalised service for individuals and businesses. The company provides expert guidance on foreign exchange transactions, helping clients navigate international markets with confidence and secure optimal exchange rates for their currency needs."
   },
   {
+    id: "vanderpod",
     number: "02",
     title: "Vanderpod",
     logo: "/logos/vanderpod.jpg",
@@ -26,6 +28,7 @@ export const contentSections = [
     description: "Vanderpod is a podcast exploring the intersection of business, culture, and lifestyle. As founder and presenter, Samuel brings compelling conversations with entrepreneurs, innovators, and thought leaders, offering insights into the challenges and triumphs of building successful ventures while maintaining authenticity and purpose."
   },
   {
+    id: "television",
     number: "03",
     title: "Television",
     shows: [
@@ -42,6 +45,7 @@ export const contentSections = [
     ]
   },
   {
+    id: "charity",
     number: "04",
     title: "Charitable Work",
     ambassadorships: [
@@ -59,6 +63,7 @@ export const contentSections = [
     ]
   },
   {
+    id: "contact",
     number: "05",
     title: "Contact",
     email: "info@samuelvanderpump.com",

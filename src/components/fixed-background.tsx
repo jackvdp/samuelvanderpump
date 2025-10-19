@@ -1,12 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export default function FixedBackground() {
   const [showBackground, setShowBackground] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [currentImage, setCurrentImage] = useState("/photos/portraitHero1.JPG");
 
   useEffect(() => {
     // Show background after opening sequence (1 second)
@@ -18,13 +19,44 @@ export default function FixedBackground() {
   }, []);
 
   useEffect(() => {
-    // Detect scroll position and toggle width
+    // Detect scroll position and toggle width + change images based on section
     const handleScroll = () => {
-      if (window.scrollY > 1) {
+      const scrollY = window.scrollY;
+      
+      // Toggle width animation
+      if (scrollY > 1) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
       }
+
+      // Change image based on which section is in view
+      // Get all section elements
+      const vanderpodSection = document.querySelector('[data-section="vanderpod"]');
+      const tvSection = document.querySelector('[data-section="television"]');
+
+      if (vanderpodSection) {
+        const rect = vanderpodSection.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
+        
+        if (inView) {
+          setCurrentImage("/photos/vanderpod-profile.jpg");
+          return;
+        }
+      }
+
+      if (tvSection) {
+        const rect = tvSection.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
+        
+        if (inView) {
+          setCurrentImage("/photos/chelsea.jpg");
+          return;
+        }
+      }
+
+      // Default image for other sections
+      setCurrentImage("/photos/portraitHero1.JPG");
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -43,16 +75,27 @@ export default function FixedBackground() {
         animate={{ width: isScrolled ? "33.333vw" : "100vw" }}
         transition={{ 
           duration: 1.0,
-          ease: [0.25, 0.1, 0.25, 0.1] // Smooth easing
+          ease: [0.25, 0.1, 0.25, 0.1]
         }}
       >
-        <Image
-          src="/photos/portraitHero1.JPG"
-          alt="Samuel Vanderpump"
-          fill
-          className="object-cover object-center"
-          priority
-        />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Image
+              src={currentImage}
+              alt="Samuel Vanderpump"
+              fill
+              className="object-cover object-center"
+              priority={currentImage === "/photos/portraitHero1.JPG"}
+            />
+          </motion.div>
+        </AnimatePresence>
         
         {/* Gradient overlays - darker on left, right, and bottom edges */}
         <div className="absolute inset-0 pointer-events-none">

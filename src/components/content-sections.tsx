@@ -24,7 +24,7 @@ export default function ContentSections() {
   return (
     <div className="relative z-10 space-y-24 pb-32">
       {contentSections.map((section, index) => (
-        <section key={index} className="px-8 md:px-16">
+        <section key={index} className="px-8 md:px-16" data-section={section.id}>
           <SectionCard 
             number={section.number}
             title={section.title}
