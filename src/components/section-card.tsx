@@ -81,7 +81,7 @@ export default function SectionCard({
         <div className="hidden md:flex items-start gap-4">
           {/* Number */}
           <div
-            className="text-white flex-shrink-0"
+            className="text-white/70 flex-shrink-0"
             style={{
               fontFamily: "var(--font-inter)",
               fontWeight: 500,
@@ -93,7 +93,7 @@ export default function SectionCard({
 
           {/* Title */}
           <h3
-            className="text-white flex-shrink-0"
+            className="text-white/70 flex-shrink-0"
             style={{
               fontFamily: "var(--font-instrument-serif)",
               fontStyle: "italic",
@@ -120,7 +120,7 @@ export default function SectionCard({
           <div className="flex items-start gap-4 mb-4">
             {/* Number */}
             <div
-              className="text-white flex-shrink-0"
+              className="text-white/70 flex-shrink-0"
               style={{
                 fontFamily: "var(--font-inter)",
                 fontWeight: 500,
@@ -132,7 +132,7 @@ export default function SectionCard({
 
             {/* Title */}
             <h3
-              className="text-white flex-shrink-0"
+              className="text-white/70 flex-shrink-0"
               style={{
                 fontFamily: "var(--font-instrument-serif)",
                 fontStyle: "italic",
@@ -146,7 +146,7 @@ export default function SectionCard({
           </div>
 
           {/* Description below, aligned with title */}
-          <div className="text-white w-full" style={{ marginLeft: "calc(16px + 1rem)" }}>
+          <div className="text-white/70 w-full" style={{ marginLeft: "calc(16px + 1rem)" }}>
             {children}
           </div>
         </div>

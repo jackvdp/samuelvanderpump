@@ -46,7 +46,7 @@ export default function ContentSections() {
               {/* Role (if exists) */}
               {section.role && (
                 <p
-                  className="text-white/70"
+                  className="text-white"
                   style={{
                     fontFamily: "var(--font-inter)",
                     fontWeight: 500,
@@ -61,7 +61,7 @@ export default function ContentSections() {
 
               {/* Description (if exists) */}
               {section.description && (
-                <p
+                <p className={"text-white/70"}
                   style={{
                     fontFamily: "var(--font-inter)",
                     fontWeight: 500,
@@ -121,6 +121,7 @@ export default function ContentSections() {
                       </div>
                       {show.description && (
                         <p
+                            className={"text-white/70"}
                           style={{
                             fontFamily: "var(--font-inter)",
                             fontWeight: 500,
@@ -149,7 +150,7 @@ export default function ContentSections() {
                           className="inline-block"
                         >
                           <h4
-                            className="text-white/70 hover:opacity-70 transition-opacity"
+                            className="text-white hover:opacity-70 transition-opacity"
                             style={{
                               fontFamily: "var(--font-inter)",
                               fontWeight: 600,
@@ -174,7 +175,7 @@ export default function ContentSections() {
                         </h4>
                       )}
                       {charity.description && (
-                        <p
+                        <p className={"text-white/70"}
                           style={{
                             fontFamily: "var(--font-inter)",
                             fontWeight: 500,
