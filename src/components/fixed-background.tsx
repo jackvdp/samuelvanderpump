@@ -20,7 +20,7 @@ export default function FixedBackground() {
   useEffect(() => {
     // Detect scroll position and toggle width
     const handleScroll = () => {
-      if (window.scrollY > 10) {
+      if (window.scrollY > 1) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -53,6 +53,18 @@ export default function FixedBackground() {
           className="object-cover object-center"
           priority
         />
+        
+        {/* Gradient overlays - darker on left, right, and bottom edges */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Left edge - dark to transparent */}
+          <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/95 to-transparent" />
+          
+          {/* Right edge - dark to transparent */}
+          <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-black/95 to-transparent" />
+          
+          {/* Bottom edge - dark to transparent */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
+        </div>
       </motion.div>
     </div>
   );
