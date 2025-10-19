@@ -1,6 +1,6 @@
 // About section is separate and used in Hero component
 export const aboutContent = {
-  number: "00",
+  number: "01",
   title: "About",
   description: "Samuel Vanderpump is CEO and Founder of Vanderpump FX, specialising in finance and foreign exchange. Beyond his work in finance, Samuel serves as an ambassador for charitable organisations, and is recognised as a television personality and podcast host, connecting with audiences on topics spanning business, culture, and philanthropy."
 };
@@ -9,7 +9,7 @@ export const aboutContent = {
 export const contentSections = [
   {
     id: "vanderpump-fx",
-    number: "01",
+    number: "02",
     title: "Vanderpump FX",
     logo: "/logos/vanderpumpfx.png",
     link: "https://vanderpumpfx.com",
@@ -19,7 +19,7 @@ export const contentSections = [
   },
   {
     id: "vanderpod",
-    number: "02",
+    number: "03",
     title: "Vanderpod",
     logo: "/logos/vanderpod.jpg",
     link: "/404",
@@ -29,7 +29,7 @@ export const contentSections = [
   },
   {
     id: "television",
-    number: "03",
+    number: "04",
     title: "Television",
     shows: [
       {
@@ -48,7 +48,7 @@ export const contentSections = [
   },
   {
     id: "charity",
-    number: "04",
+    number: "05",
     title: "Charitable Work",
     ambassadorships: [
       {
@@ -68,7 +68,7 @@ export const contentSections = [
   },
   {
     id: "contact",
-    number: "05",
+    number: "06",
     title: "Contact",
     email: "hello@samuelvanderpump.com",
     description: "For business enquiries, media requests, or charitable partnership opportunities, please get in touch.",
