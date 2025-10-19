@@ -50,7 +50,7 @@ export default function OpeningSequence() {
               exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
-                src="/photos/portrait1.JPG"
+                src="/photos/gladiator.jpg"
                 alt="Samuel Vanderpump"
                 fill
                 className="object-cover object-center"
@@ -67,7 +67,7 @@ export default function OpeningSequence() {
               exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
-                src="/photos/portrait2.JPG"
+                src="/photos/vanderpod-profile.jpg"
                 alt="Samuel Vanderpump"
                 fill
                 className="object-cover object-center"
@@ -84,7 +84,7 @@ export default function OpeningSequence() {
               exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
-                src="/photos/portrait3.JPG"
+                src="/photos/portrait7.jpg"
                 alt="Samuel Vanderpump"
                 fill
                 className="object-cover object-center"
