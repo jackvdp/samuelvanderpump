@@ -21,38 +21,51 @@ export default function Hero() {
 
   return (
     <section className="relative z-20 min-h-screen flex items-start p-8 md:p-16 pt-32 md:pt-40">
-      <motion.div
-        className="text-left"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
+      <div className="text-left">
         {/* Samuel - Instrument Serif 400 Italic */}
-        <h1 
-          className="text-white leading-none"
-          style={{
-            fontFamily: "var(--font-instrument-serif)",
-            fontStyle: "italic",
-            fontWeight: 400,
-            fontSize: "150px",
-          }}
-        >
-          Samuel
-        </h1>
+        <div className="overflow-hidden">
+          <motion.h1 
+            className="text-white leading-none"
+            style={{
+              fontFamily: "var(--font-instrument-serif)",
+              fontStyle: "italic",
+              fontWeight: 400,
+              fontSize: "150px",
+            }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            transition={{ 
+              duration: 1.5, 
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.3
+            }}
+          >
+            Samuel
+          </motion.h1>
+        </div>
         
         {/* Vanderpump - Inter 700 */}
-        <h2 
-          className="text-white leading-none"
-          style={{
-            fontFamily: "var(--font-inter)",
-            fontStyle: "normal",
-            fontWeight: 700,
-            fontSize: "150px",
-          }}
-        >
-          Vanderpump
-        </h2>
-      </motion.div>
+        <div className="overflow-hidden">
+          <motion.h2 
+            className="text-white leading-none"
+            style={{
+              fontFamily: "var(--font-inter)",
+              fontStyle: "normal",
+              fontWeight: 700,
+              fontSize: "150px",
+            }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            transition={{ 
+              duration: 1.5, 
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.3
+            }}
+          >
+            Vanderpump
+          </motion.h2>
+        </div>
+      </div>
     </section>
   );
 }
