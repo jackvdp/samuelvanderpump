@@ -9,6 +9,7 @@ interface SectionCardProps {
   children: ReactNode;
   delay?: number;
   width?: string;
+  fullWidthLine?: boolean;
 }
 
 export default function SectionCard({ 
@@ -16,7 +17,8 @@ export default function SectionCard({
   title, 
   children, 
   delay = 0,
-  width = "66.666%"
+  width = "66.666%",
+  fullWidthLine = false
 }: SectionCardProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1, margin: "0px 0px -200px 0px" });
@@ -24,20 +26,52 @@ export default function SectionCard({
   return (
     <div ref={ref} className="pr-16" style={{ width }}>
       {/* Animated top line */}
-      <motion.div
-        className="w-full h-[3px] bg-white mb-8"
-        initial={{ width: 0 }}
-        animate={isInView ? { width: "100%" } : { width: 0 }}
-        transition={{ 
-          duration: 1, 
-          ease: [0.22, 1, 0.36, 1],
-          delay
-        }}
-      />
+      <div className="relative mb-8">
+        {fullWidthLine ? (
+          // Full width thick line for About section
+          <motion.div
+            className="w-full h-[4px] bg-white"
+            initial={{ width: 0 }}
+            animate={isInView ? { width: "100%" } : { width: 0 }}
+            transition={{ 
+              duration: 1, 
+              ease: [0.22, 1, 0.36, 1],
+              delay
+            }}
+          />
+        ) : (
+          // Two lines: 250px thick line + full width thin line
+          <>
+            {/* Thick 250px line */}
+            <motion.div
+              className="absolute top-0 left-0 h-[4px] bg-white"
+              style={{ width: "250px" }}
+              initial={{ width: 0 }}
+              animate={isInView ? { width: "250px" } : { width: 0 }}
+              transition={{ 
+                duration: 1, 
+                ease: [0.22, 1, 0.36, 1],
+                delay
+              }}
+            />
+            {/* Thin full-width line */}
+            <motion.div
+              className="w-full h-[1px] bg-white/50"
+              initial={{ width: 0 }}
+              animate={isInView ? { width: "100%" } : { width: 0 }}
+              transition={{ 
+                duration: 1, 
+                ease: [0.22, 1, 0.36, 1],
+                delay: delay + 0.2
+              }}
+            />
+          </>
+        )}
+      </div>
 
       {/* Content */}
       <motion.div
-        className="flex items-start gap-8"
+        className="flex items-start gap-4"
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ 
