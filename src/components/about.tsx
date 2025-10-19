@@ -19,7 +19,7 @@ export default function About() {
 
       {/* Content */}
       <motion.div
-        className="flex items-start gap-8"
+        className="flex items-start gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ 
