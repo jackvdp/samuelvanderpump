@@ -42,7 +42,7 @@ export default function Navigation() {
 
         {/* Top Right - Contact */}
         <div className="pointer-events-auto">
-          <NavItem href="mailto:info@samuelvanderpump.com">Contact</NavItem>
+          <NavItem href="mailto:hello@samuelvanderpump.com">Contact</NavItem>
         </div>
       </div>
 

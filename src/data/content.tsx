@@ -22,7 +22,7 @@ export const contentSections = [
     number: "02",
     title: "Vanderpod",
     logo: "/logos/vanderpod.jpg",
-    link: "https://vanderpod.com",
+    link: "/404",
     linkText: "Listen to Vanderpod",
     role: "Founder & Presenter",
     description: "Vanderpod is a podcast exploring the intersection of business, culture, and lifestyle. As founder and presenter, Samuel brings compelling conversations with entrepreneurs, innovators, and thought leaders, offering insights into the challenges and triumphs of building successful ventures while maintaining authenticity and purpose."
@@ -57,7 +57,7 @@ export const contentSections = [
       {
         organization: "NHS Blood and Transplant",
         division: "Organ Donation",
-        link: "https://nhsbt.nhs.uk",
+        link: "https://www.nhsbt.nhs.uk",
         description: "Ambassador promoting organ donation awareness and encouraging registration on the NHS Organ Donor Register, helping to save and transform lives through the gift of transplantation."
       }
     ]
@@ -66,7 +66,7 @@ export const contentSections = [
     id: "contact",
     number: "05",
     title: "Contact",
-    email: "info@samuelvanderpump.com",
+    email: "hello@samuelvanderpump.com",
     description: "For business enquiries, media requests, or charitable partnership opportunities, please get in touch."
   }
 ];
