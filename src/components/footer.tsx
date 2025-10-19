@@ -12,7 +12,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="relative z-10 pb-4 px-16">
+    <footer className="relative z-10 pb-4 px-8 md:px-16">
       {/* Animated line - full width */}
       <motion.div
         className="w-full h-[4px] bg-white mb-4"

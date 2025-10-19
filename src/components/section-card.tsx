@@ -23,7 +23,7 @@ export default function SectionCard({
   const isInView = useInView(ref, { once: true, amount: 0.1, margin: "0px 0px -200px 0px" });
 
   return (
-    <div ref={ref} className="pr-16 w-full md:w-2/3">
+    <div ref={ref} className="pr-8 md:pr-16 w-full md:w-2/3">
       {/* Animated top line */}
       <div className="relative mb-8">
         {fullWidthLine ? (
