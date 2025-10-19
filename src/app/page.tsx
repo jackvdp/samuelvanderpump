@@ -1,6 +1,7 @@
 import OpeningSequence from "@/components/opening-sequence";
 import FixedBackground from "@/components/fixed-background";
 import Hero from "@/components/hero";
+import Navigation from "@/components/navigation";
 
 export default function Home() {
   return (
@@ -10,6 +11,9 @@ export default function Home() {
       
       {/* Fixed Background Image - Stays in place */}
       <FixedBackground />
+      
+      {/* Navigation - Fixed above everything */}
+      <Navigation />
       
       {/* Scrollable Content */}
       <div className="relative z-10">

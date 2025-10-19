@@ -20,7 +20,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative z-20 min-h-screen flex items-start p-8 md:p-16">
+    <section className="relative z-20 min-h-screen flex items-start p-8 md:p-16 pt-32 md:pt-40">
       <motion.div
         className="text-left"
         initial={{ opacity: 0, y: -20 }}
@@ -34,7 +34,7 @@ export default function Hero() {
             fontFamily: "var(--font-instrument-serif)",
             fontStyle: "italic",
             fontWeight: 400,
-            fontSize: "200px",
+            fontSize: "150px",
           }}
         >
           Samuel
@@ -47,7 +47,7 @@ export default function Hero() {
             fontFamily: "var(--font-inter)",
             fontStyle: "normal",
             fontWeight: 700,
-            fontSize: "200px",
+            fontSize: "150px",
           }}
         >
           Vanderpump
