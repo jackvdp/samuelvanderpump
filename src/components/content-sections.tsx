@@ -39,12 +39,13 @@ export default function ContentSections() {
                   rel="noopener noreferrer"
                   className="inline-block"
                 >
-                  <div className="relative w-64 h-64 mb-4">
+                  <div className="relative w-64 h-auto mb-4">
                     <Image
-                      src={section.logo}
-                      alt={section.title}
-                      fill
-                      className="object-contain"
+                        src={section.logo}
+                        alt={section.title}
+                        width={256}
+                        height={256}
+                        className="object-contain w-full h-auto"
                     />
                   </div>
                 </a>

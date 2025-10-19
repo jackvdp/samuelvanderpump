@@ -23,6 +23,15 @@ export default function Navigation() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const scrollToFirstSection = () => {
+    const firstSection = document.querySelector('[data-section]');
+    if (firstSection) {
+      const offsetTop = firstSection.getBoundingClientRect().top + window.scrollY;
+      const padding = 80; // Add some padding from the top
+      window.scrollTo({ top: offsetTop - padding, behavior: "smooth" });
+    }
+  };
+
   return (
     <nav className="fixed inset-0 pointer-events-none z-50">
       <div className="absolute top-0 left-0 right-0 flex items-start justify-between pr-16 pl-16 pt-4">
@@ -43,7 +52,7 @@ export default function Navigation() {
           {isScrolled ? (
             <NavItem onClick={scrollToTop}>Back to top</NavItem>
           ) : (
-            <NavItem>Scroll down</NavItem>
+            <NavItem onClick={scrollToFirstSection}>Scroll down</NavItem>
           )}
         </div>
       </div>
