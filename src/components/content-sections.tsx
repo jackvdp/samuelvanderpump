@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import SectionCard from "./section-card";
 import { contentSections } from "@/data/content";
 import Image from "next/image";
