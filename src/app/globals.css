@@ -28,9 +28,17 @@
     @apply border-0 outline-none;
   }
   
+  html {
+    /* Prevent scroll bounce */
+    overscroll-behavior: none;
+  }
+  
   body {
     @apply bg-black text-white antialiased;
     font-family: var(--font-inter);
+    /* Prevent scroll bounce on body */
+    overscroll-behavior: none;
+    position: relative;
   }
   
   h1, h2, h3, h4, h5, h6 {
