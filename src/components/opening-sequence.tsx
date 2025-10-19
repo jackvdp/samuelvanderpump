@@ -47,11 +47,7 @@ export default function OpeningSequence() {
               className="relative h-[85vh] flex-1 border-y border-l border-white/30 overflow-hidden"
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0, scale: 0.9 }}
-              transition={{ 
-                initial: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0 },
-                exit: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-              }}
+              exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
                 src="/photos/portrait1.JPG"
@@ -68,11 +64,7 @@ export default function OpeningSequence() {
               className="relative h-[90vh] flex-[1.3] border-y border-x border-white/30 overflow-hidden mx-2 md:mx-4"
               initial={{ y: 100, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -400, opacity: 0, scale: 0.85 }}
-              transition={{ 
-                initial: { duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 },
-                exit: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.05 }
-              }}
+              exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
                 src="/photos/portrait2.JPG"
@@ -89,11 +81,7 @@ export default function OpeningSequence() {
               className="relative h-[85vh] flex-1 border-y border-r border-white/30 overflow-hidden"
               initial={{ x: 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 300, opacity: 0, scale: 0.9 }}
-              transition={{ 
-                initial: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 },
-                exit: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }
-              }}
+              exit={{ x: 0, opacity: 0, scale: 1 }}
             >
               <Image
                 src="/photos/portrait3.JPG"
