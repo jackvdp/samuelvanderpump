@@ -52,12 +52,14 @@ export const contentSections = [
       {
         organization: "The UK Sepsis Trust",
         link: "https://sepsistrust.org",
+        logo: "/logos/sepsis.webp",
         description: "Ambassador for the UK's leading sepsis charity, raising awareness of this life-threatening condition and supporting initiatives to improve early detection and treatment across healthcare settings."
       },
       {
         organization: "NHS Blood and Transplant",
         division: "Organ Donation",
         link: "https://www.nhsbt.nhs.uk",
+        logo: "/logos/organ.png",
         description: "Ambassador promoting organ donation awareness and encouraging registration on the NHS Organ Donor Register, helping to save and transform lives through the gift of transplantation."
       }
     ]

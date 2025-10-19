@@ -149,6 +149,36 @@ export default function ContentSections() {
                 <div className="space-y-6">
                   {section.ambassadorships.map((charity, charityIndex) => (
                     <div key={charityIndex} className="space-y-2">
+                      {/* Logo (if exists) */}
+                      {charity.logo && (
+                        <div className="mb-4">
+                          {charity.link ? (
+                            <a
+                              href={charity.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block"
+                            >
+                              <Image
+                                src={charity.logo}
+                                alt={charity.organization}
+                                width={256}
+                                height={256}
+                                className="object-contain w-32 h-auto"
+                              />
+                            </a>
+                          ) : (
+                            <Image
+                              src={charity.logo}
+                              alt={charity.organization}
+                              width={256}
+                              height={256}
+                              className="object-contain w-32 h-auto"
+                            />
+                          )}
+                        </div>
+                      )}
+
                       {charity.link ? (
                         <a
                           href={charity.link}
