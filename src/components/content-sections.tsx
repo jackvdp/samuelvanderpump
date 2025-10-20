@@ -4,7 +4,7 @@ import SectionCard from "./section-card";
 import { contentSections } from "@/data/content";
 import Image from "next/image";
 import { useOpeningDelay } from "@/hooks/use-opening-delay";
-import {SiInstagram, SiLinkedin, SiTiktok, SiFacebook, SiYoutube} from "react-icons/si";
+import {SiInstagram, SiLinkedin, SiTiktok, SiFacebook, SiYoutube, SiApple, SiSpotify, SiAudible} from "react-icons/si";
 
 const socialIconMap = {
   Instagram: SiInstagram,
@@ -12,6 +12,13 @@ const socialIconMap = {
   TikTok: SiTiktok,
   Facebook: SiFacebook,
   Youtube: SiYoutube,
+};
+
+const podcastIconMap = {
+  Youtube: SiYoutube,
+  Apple: SiApple,
+  Spotify: SiSpotify,
+  Audible: SiAudible,
 };
 
 export default function ContentSections() {
@@ -96,6 +103,27 @@ export default function ContentSections() {
                 >
                   {section.linkText} →
                 </a>
+              )}
+
+              {/* Podcast Links (if exists - Vanderpod section) */}
+              {section.podcastLinks && section.podcastLinks.length > 0 && (
+                <div className="flex items-center gap-4 pt-4">
+                  {section.podcastLinks.map((podcast) => {
+                    const Icon = podcastIconMap[podcast.platform as keyof typeof podcastIconMap];
+                    return Icon ? (
+                      <a
+                        key={podcast.platform}
+                        href={podcast.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white hover:opacity-70 transition-opacity"
+                        aria-label={podcast.platform}
+                      >
+                        <Icon className="w-6 h-6" />
+                      </a>
+                    ) : null;
+                  })}
+                </div>
               )}
 
               {/* Shows (if exists - Television section) */}

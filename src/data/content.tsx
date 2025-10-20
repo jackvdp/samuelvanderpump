@@ -22,10 +22,14 @@ export const contentSections = [
     number: "03",
     title: "Vanderpod",
     logo: "/logos/vanderpod.jpg",
-    link: "https://youtube.com/@vanderpodofficial?si=6h4zXKH2vTt5jvS0",
-    linkText: "Listen to Vanderpod",
     role: "Founder & Presenter",
-    description: "Vanderpod is a podcast exploring the intersection of business, culture, and lifestyle. As founder and presenter, Samuel brings compelling conversations with entrepreneurs, innovators, and thought leaders, offering insights into the challenges and triumphs of building successful ventures while maintaining authenticity and purpose."
+    description: "Vanderpod is a podcast exploring the intersection of business, culture, and lifestyle. As founder and presenter, Samuel brings compelling conversations with entrepreneurs, innovators, and thought leaders, offering insights into the challenges and triumphs of building successful ventures while maintaining authenticity and purpose.",
+    podcastLinks: [
+      { platform: "Youtube", url: "https://youtube.com/@vanderpodofficial?si=6h4zXKH2vTt5jvS0" },
+      { platform: "Apple", url: "https://podcasts.apple.com/gb/podcast/vanderpod-filthy-rich/id1842732051" },
+      { platform: "Spotify", url: "https://open.spotify.com/show/49bcX2NX9Z5iFpcyIsDDF8?si=b4znH7g0TjijFiPc7O3UYA" },
+      { platform: "Audible", url: "https://www.audible.co.uk/pd/B0FT1S9J95?source_code=ASSORAP0511160006&share_location=podcast_show_detail" },
+    ]
   },
   {
     id: "television",

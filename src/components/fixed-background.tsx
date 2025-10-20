@@ -9,7 +9,7 @@ export default function FixedBackground() {
   const showBackground = useOpeningDelay();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const mainBackgroundImage = "/photos/main.jpg";
+  const mainBackgroundImage = "/photos/main.JPG";
   const [currentImage, setCurrentImage] = useState(mainBackgroundImage);
 
   useEffect(() => {
