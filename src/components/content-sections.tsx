@@ -106,13 +106,30 @@ export default function ContentSections() {
                       {/* Logo (if exists) */}
                       {show.logo && (
                         <div className="mb-4">
-                          <Image
-                            src={show.logo}
-                            alt={show.name}
-                            width={128}
-                            height={128}
-                            className="object-contain w-32 h-auto"
-                          />
+                          {show.link ? (
+                            <a
+                              href={show.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block"
+                            >
+                              <Image
+                                src={show.logo}
+                                alt={show.name}
+                                width={128}
+                                height={128}
+                                className="object-contain w-32 h-auto"
+                              />
+                            </a>
+                          ) : (
+                            <Image
+                              src={show.logo}
+                              alt={show.name}
+                              width={128}
+                              height={128}
+                              className="object-contain w-32 h-auto"
+                            />
+                          )}
                         </div>
                       )}
 

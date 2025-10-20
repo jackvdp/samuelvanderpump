@@ -36,12 +36,14 @@ export const contentSections = [
         name: "Made in Chelsea",
         network: "E4",
         logo: "/logos/mic.png",
+        link: "https://www.channel4.com/programmes/made-in-chelsea?cntsrc=social_share_ios_made_in_chelsea",
         description: "Featured cast member on the award-winning reality series chronicling the lives of affluent young people in West London."
       },
       {
         name: "Vanderpump Villa",
         network: "Hulu",
         logo: "/logos/vanderpumpvilla.webp",
+        link: "https://www.hulu.com/series/vanderpump-villa-bf42f6f5-db26-4429-85e0-17e86d161c98",
         description: "Reality series following the operations of an exclusive villa led by Lisa Vanderpump, showcasing luxury hospitality and interpersonal dynamics."
       }
     ]
