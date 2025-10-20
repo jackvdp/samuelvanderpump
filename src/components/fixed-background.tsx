@@ -124,7 +124,7 @@ export default function FixedBackground() {
               alt="Samuel Vanderpump"
               fill
               className="object-cover object-top"
-              priority={currentImage === mainBackgroundImage}
+              priority={true}
             />
           </motion.div>
         </AnimatePresence>

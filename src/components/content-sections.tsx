@@ -39,7 +39,7 @@ export default function ContentSections() {
           >
             <div className="space-y-4">
               {/* Logo (if exists) */}
-              {section.logo && section.link && (
+              {(section.logo && section.link) ? (
                 <a 
                   href={section.link}
                   target="_blank"
@@ -56,6 +56,16 @@ export default function ContentSections() {
                     />
                   </div>
                 </a>
+              ) : (section.logo) && (
+                  <div className="relative w-64 h-auto mb-4">
+                    <Image
+                        src={section.logo}
+                        alt={section.title}
+                        width={256}
+                        height={256}
+                        className="object-contain w-full h-auto"
+                    />
+                  </div>
               )}
 
               {/* Role (if exists) */}
