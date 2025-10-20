@@ -123,7 +123,7 @@ export default function FixedBackground() {
               src={currentImage}
               alt="Samuel Vanderpump"
               fill
-              className="object-cover object-center"
+              className="object-cover object-top"
               priority={currentImage === "/photos/portraitHero1.JPG"}
             />
           </motion.div>
