@@ -42,7 +42,7 @@ export const contentSections = [
         name: "Vanderpump Villa",
         network: "Hulu",
         logo: "/logos/vanderpumpvilla.webp",
-        description: "Reality series following the operations of an exclusive French chateau, showcasing luxury hospitality and interpersonal dynamics."
+        description: "Reality series following the operations of an exclusive villa led by Lisa Vanderpump, showcasing luxury hospitality and interpersonal dynamics."
       }
     ]
   },

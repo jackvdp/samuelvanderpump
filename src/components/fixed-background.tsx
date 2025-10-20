@@ -42,6 +42,7 @@ export default function FixedBackground() {
       const vanderpumpfxSection = document.querySelector('[data-section="vanderpump-fx"]');
       const vanderpodSection = document.querySelector('[data-section="vanderpod"]');
       const tvSection = document.querySelector('[data-section="television"]');
+      const charitySection = document.querySelector('[data-section="charity"]');
 
       if (vanderpumpfxSection) {
         const rect = vanderpumpfxSection.getBoundingClientRect();
@@ -69,6 +70,16 @@ export default function FixedBackground() {
         
         if (inView) {
           setCurrentImage("/photos/chelsea.jpg");
+          return;
+        }
+      }
+
+      if (charitySection) {
+        const rect = charitySection.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
+
+        if (inView) {
+          setCurrentImage("/photos/gladiator.jpg");
           return;
         }
       }
