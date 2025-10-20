@@ -9,7 +9,8 @@ export default function FixedBackground() {
   const showBackground = useOpeningDelay();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [currentImage, setCurrentImage] = useState("/photos/portraitHero1.JPG");
+  const mainBackgroundImage = "/photos/main.jpg";
+  const [currentImage, setCurrentImage] = useState(mainBackgroundImage);
 
   useEffect(() => {
     // Check if mobile
@@ -59,7 +60,7 @@ export default function FixedBackground() {
         const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
 
         if (inView) {
-          setCurrentImage("/photos/vanderpod-profile.jpg");
+          setCurrentImage("/photos/gladiator.jpg");
           return;
         }
       }
@@ -79,13 +80,13 @@ export default function FixedBackground() {
         const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
 
         if (inView) {
-          setCurrentImage("/photos/gladiator.jpg");
+          setCurrentImage("/photos/portraitHero1.JPG");
           return;
         }
       }
 
       // Default image for other sections
-      setCurrentImage("/photos/portraitHero1.JPG");
+      setCurrentImage(mainBackgroundImage);
     };
 
     window.addEventListener("scroll", handleScroll);
