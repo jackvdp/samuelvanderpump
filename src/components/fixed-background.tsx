@@ -39,13 +39,24 @@ export default function FixedBackground() {
 
       // Change image based on which section is in view
       // Get all section elements
+      const vanderpumpfxSection = document.querySelector('[data-section="vanderpump-fx"]');
       const vanderpodSection = document.querySelector('[data-section="vanderpod"]');
       const tvSection = document.querySelector('[data-section="television"]');
+
+      if (vanderpumpfxSection) {
+        const rect = vanderpumpfxSection.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
+        
+        if (inView) {
+          setCurrentImage("/photos/portrait3.JPG");
+          return;
+        }
+      }
 
       if (vanderpodSection) {
         const rect = vanderpodSection.getBoundingClientRect();
         const inView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
-        
+
         if (inView) {
           setCurrentImage("/photos/vanderpod-profile.jpg");
           return;

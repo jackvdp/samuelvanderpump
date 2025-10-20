@@ -54,7 +54,7 @@ export default function Navigation() {
           <NavItem href="mailto:hello@samuelvanderpump.com">Contact</NavItem>
           
           {/* Social Media Icons */}
-          <div className="flex items-center gap-4">
+          <div className="items-center gap-4 hidden md:flex">
             {socialLinks.map((social) => (
               <a
                 key={social.label}
