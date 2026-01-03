@@ -51,7 +51,7 @@ export default function Navigation() {
 
         {/* Top Right - Contact & Social Icons */}
         <div className="pointer-events-auto flex items-center gap-6">
-          <NavItem href="mailto:hello@samuelvanderpump.com">Contact</NavItem>
+          <NavItem href="mailto:info@bnocagency.com">Contact</NavItem>
           
           {/* Social Media Icons */}
           <div className="items-center gap-4 hidden md:flex">

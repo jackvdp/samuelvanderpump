@@ -76,7 +76,7 @@ export const contentSections = [
     id: "contact",
     number: "06",
     title: "Contact",
-    email: "hello@samuelvanderpump.com",
+    email: "info@bnocagency.com",
     description: "For business enquiries, media requests, or charitable partnership opportunities, please get in touch.",
     socialLinks: [
       { platform: "Instagram", url: "https://www.instagram.com/samvanderpump?igsh=ZXFjN3l1eHBjczk0&utm_source=qr" },
