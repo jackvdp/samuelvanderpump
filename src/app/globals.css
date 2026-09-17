@@ -8,6 +8,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-inter);
+  --color-flame: var(--flame);
+  --color-nero: var(--nero);
   --radius-sm: 0;
   --radius-md: 0;
   --radius-lg: 0;
@@ -21,6 +23,14 @@
   
   /* Remove all rounded corners */
   --radius: 0;
+
+  /* Block Kart game palette */
+  --flame: #f97316;
+  --nero: #1e1d1d;
+}
+
+@utility font-pixel {
+  font-family: var(--font-pixel), ui-monospace, monospace;
 }
 
 @layer base {
