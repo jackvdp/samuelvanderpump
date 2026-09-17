@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { T, boxGeometryWithTiles, uniformFaces } from "./textures";
+import { D, buildDriverTexture } from "./driver-texture";
+import type { Character } from "./characters";
 
 export type KartModel = {
   root: THREE.Group;
@@ -27,32 +29,37 @@ function ensureShared() {
       east: T.TYRE_SIDE,
       west: T.TYRE_SIDE,
     });
+    // head and torso UVs point into the per-driver atlas, which every driver
+    // lays out identically, so the geometry can still be shared
     headGeo = boxGeometryWithTiles(0.56, 0.56, 0.56, {
-      top: T.HAIR,
-      bottom: T.SKIN_HAIR,
-      north: T.SKIN_HAIR,
-      south: T.FACE,
-      east: T.SKIN_HAIR,
-      west: T.SKIN_HAIR,
+      top: D.HAIR,
+      bottom: D.SIDE,
+      north: D.SIDE,
+      south: D.FACE,
+      east: D.SIDE,
+      west: D.SIDE,
     });
-    torsoGeo = boxGeometryWithTiles(0.56, 0.5, 0.3, uniformFaces(T.SHIRT));
+    torsoGeo = boxGeometryWithTiles(0.56, 0.5, 0.3, uniformFaces(D.SHIRT));
     shadowGeo = new THREE.CircleGeometry(1.15, 10);
     sharedGeos.push(wheelGeo, headGeo, torsoGeo, shadowGeo);
   }
 }
 
-export function buildKart(color: number, atlas: THREE.Texture): KartModel {
+export function buildKart(character: Character, atlas: THREE.Texture): KartModel {
   ensureShared();
   const root = new THREE.Group();
   const body = new THREE.Group();
   root.add(body);
 
-  const paint = new THREE.MeshLambertMaterial({ color });
+  const driverTex = buildDriverTexture(character);
+  const paint = new THREE.MeshLambertMaterial({ color: character.color });
+  const outfit = new THREE.MeshLambertMaterial({ color: character.outfit });
   const dark = new THREE.MeshLambertMaterial({ color: 0x2a2a2e });
   const steel = new THREE.MeshLambertMaterial({ color: 0xb8bcc4 });
   const texMat = new THREE.MeshLambertMaterial({ map: atlas });
+  const driverMat = new THREE.MeshLambertMaterial({ map: driverTex });
   const flameMat = new THREE.MeshBasicMaterial({ color: 0xffb020, transparent: true, opacity: 0.9 });
-  const mats = [paint, dark, steel, texMat, flameMat];
+  const mats = [paint, outfit, dark, steel, texMat, driverMat, flameMat];
   const geos: THREE.BufferGeometry[] = [];
   const box = (w: number, h: number, d: number, m: THREE.Material, x: number, y: number, z: number) => {
     const g = new THREE.BoxGeometry(w, h, d);
@@ -75,14 +82,14 @@ export function buildKart(color: number, atlas: THREE.Texture): KartModel {
   box(0.06, 0.24, 0.06, steel, 0, 0.72, 0.36);
 
   // driver
-  const torso = new THREE.Mesh(torsoGeo!, texMat);
+  const torso = new THREE.Mesh(torsoGeo!, driverMat);
   torso.position.set(0, 0.98, -0.3);
   body.add(torso);
-  const head = new THREE.Mesh(headGeo!, texMat);
+  const head = new THREE.Mesh(headGeo!, driverMat);
   head.position.set(0, 1.52, -0.3);
   body.add(head);
-  box(0.16, 0.16, 0.5, paint, -0.36, 1.0, -0.05); // arms
-  box(0.16, 0.16, 0.5, paint, 0.36, 1.0, -0.05);
+  box(0.16, 0.16, 0.5, outfit, -0.36, 1.0, -0.05); // arms
+  box(0.16, 0.16, 0.5, outfit, 0.36, 1.0, -0.05);
 
   // wheels: front pair sits in pivots so they can yaw with steering
   const wheels: THREE.Mesh[] = [];
@@ -138,6 +145,7 @@ export function buildKart(color: number, atlas: THREE.Texture): KartModel {
     dispose: () => {
       geos.forEach((g) => g.dispose());
       mats.forEach((m) => m.dispose());
+      driverTex.dispose();
     },
   };
 }

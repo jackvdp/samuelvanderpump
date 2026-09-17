@@ -5,15 +5,25 @@ import { buildWorld, B, type World } from "./world";
 import { buildKart, disposeSharedKartGeometry, type KartModel } from "./kart-model";
 import { createChannel, mergeInput, KeyboardInput, type InputChannel } from "./input";
 import { GameAudio } from "./audio";
+import { CHARACTERS, characterById, characterMods, type Character, type CharacterMods } from "./characters";
 
 export type Phase = "ready" | "countdown" | "racing" | "finished";
 
 export type RacerResult = {
+  id: string;
   name: string;
   color: string;
   time: number | null;
   isPlayer: boolean;
   position: number;
+};
+
+export type GridEntry = {
+  id: string;
+  name: string;
+  first: string;
+  color: string;
+  isPlayer: boolean;
 };
 
 export type HudState = {
@@ -31,11 +41,12 @@ export type HudState = {
   drifting: boolean;
   wrongWay: boolean;
   results: RacerResult[] | null;
+  grid: GridEntry[]; // everyone in the race, player included
 };
 
 type Kart = {
-  name: string;
-  color: number;
+  character: Character;
+  mods: CharacterMods;
   isPlayer: boolean;
   model: KartModel;
   x: number;
@@ -82,12 +93,13 @@ const OFFROAD_FACTOR = 0.55;
 const KART_RADIUS = 0.72;
 const STEP = 1 / 60;
 
-const PLAYER_COLOR = 0xf97316;
-const AI_KARTS = [
-  { name: "Cobble", color: 0x3b82f6, skill: 0.93 },
-  { name: "Ember", color: 0xef4444, skill: 0.9 },
-  { name: "Moss", color: 0x22c55e, skill: 0.86 },
-];
+// the three rivals are drawn from the rest of the cast; skill keeps the pack
+// spread out whoever they turn out to be
+const AI_SKILLS = [0.93, 0.9, 0.86];
+
+function hexColor(c: number) {
+  return "#" + c.toString(16).padStart(6, "0");
+}
 
 const ROAD_BLOCKS = new Set<number>([B.ROAD, B.FINISH, B.BOOST, B.ROAD_LINE, B.KERB_RED, B.KERB_WHITE]);
 
@@ -182,6 +194,7 @@ export type GameOptions = {
   canvas: HTMLCanvasElement;
   onHud: (state: HudState) => void;
   touch?: InputChannel; // shared with the on-screen controls
+  character?: string; // roster id from characters.ts; falls back to the default
 };
 
 export class KartGame {
@@ -197,7 +210,8 @@ export class KartGame {
   private track: Track;
   private world: World;
   private karts: Kart[] = [];
-  private player: Kart;
+  private player!: Kart; // assigned by buildRacers() in the constructor
+  private playerCharacter: Character;
   private particles = new Particles();
   private clouds: THREE.Mesh[] = [];
   private cloudGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -274,50 +288,8 @@ export class KartGame {
     this.scene.add(this.sunMesh);
 
     // racers
-    const mk = (name: string, color: number, isPlayer: boolean, skill: number): Kart => {
-      const model = buildKart(color, this.atlas);
-      this.scene.add(model.root);
-      return {
-        name,
-        color,
-        isPlayer,
-        model,
-        x: 0,
-        z: 0,
-        heading: 0,
-        speed: 0,
-        vx: 0,
-        vz: 0,
-        steer: 0,
-        driftDir: 0,
-        driftTime: 0,
-        boostTime: 0,
-        boostEdge: false,
-        hop: 0,
-        offroad: false,
-        trackIdx: 0,
-        prevFrac: 0,
-        completed: -1,
-        checkpoints: 7,
-        finished: false,
-        finishTime: 0,
-        lapStart: 0,
-        bestLap: null,
-        lastLap: null,
-        wheelSpin: 0,
-        wrongWayTime: 0,
-        wrongWay: false,
-        bumpCooldown: 0,
-        visualYaw: 0,
-        ai: isPlayer
-          ? null
-          : { phase: Math.random() * Math.PI * 2, skill, stuck: 0, reverse: 0, input: createChannel() },
-      };
-    };
-    AI_KARTS.forEach((a) => this.karts.push(mk(a.name, a.color, false, a.skill)));
-    this.player = mk("You", PLAYER_COLOR, true, 1);
-    this.karts.push(this.player);
-    this.placeOnGrid();
+    this.playerCharacter = characterById(opts.character);
+    this.buildRacers();
 
     this.keyboard.attach();
     document.addEventListener("visibilitychange", this.onVisibility);
@@ -345,6 +317,31 @@ export class KartGame {
 
   setMuted(m: boolean) {
     this.audio.setMuted(m);
+  }
+
+  // Swap the player's driver while still in the lobby. The rivals are
+  // reshuffled from the rest of the cast at the same time.
+  selectCharacter(id: string) {
+    if (this.phase !== "ready") return;
+    const c = characterById(id);
+    if (c.id === this.playerCharacter.id) return;
+    this.playerCharacter = c;
+    this.buildRacers();
+    this.emitHud();
+  }
+
+  get characterId() {
+    return this.playerCharacter.id;
+  }
+
+  // back to the driver-select screen after a race
+  backToLobby() {
+    if (this.phase === "ready") return;
+    this.phase = "ready";
+    this.raceTime = 0;
+    this.goShown = 0;
+    this.placeOnGrid();
+    this.emitHud();
   }
 
   resize() {
@@ -383,6 +380,64 @@ export class KartGame {
       this.audio.resume();
     }
   };
+
+  private makeKart(character: Character, isPlayer: boolean, skill: number): Kart {
+    const model = buildKart(character, this.atlas);
+    this.scene.add(model.root);
+    return {
+      character,
+      mods: characterMods(character),
+      isPlayer,
+      model,
+      x: 0,
+      z: 0,
+      heading: 0,
+      speed: 0,
+      vx: 0,
+      vz: 0,
+      steer: 0,
+      driftDir: 0,
+      driftTime: 0,
+      boostTime: 0,
+      boostEdge: false,
+      hop: 0,
+      offroad: false,
+      trackIdx: 0,
+      prevFrac: 0,
+      completed: -1,
+      checkpoints: 7,
+      finished: false,
+      finishTime: 0,
+      lapStart: 0,
+      bestLap: null,
+      lastLap: null,
+      wheelSpin: 0,
+      wrongWayTime: 0,
+      wrongWay: false,
+      bumpCooldown: 0,
+      visualYaw: 0,
+      ai: isPlayer
+        ? null
+        : { phase: Math.random() * Math.PI * 2, skill, stuck: 0, reverse: 0, input: createChannel() },
+    };
+  }
+
+  private buildRacers() {
+    for (const k of this.karts) {
+      this.scene.remove(k.model.root);
+      k.model.dispose();
+    }
+    this.karts = [];
+    const pool = CHARACTERS.filter((c) => c.id !== this.playerCharacter.id);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    AI_SKILLS.forEach((skill, i) => this.karts.push(this.makeKart(pool[i], false, skill)));
+    this.player = this.makeKart(this.playerCharacter, true, 1);
+    this.karts.push(this.player);
+    this.placeOnGrid();
+  }
 
   private beginCountdown() {
     this.phase = "countdown";
@@ -522,14 +577,14 @@ export class KartGame {
     } else k.boostEdge = false;
 
     const boosting = k.boostTime > 0;
-    let maxSpeed = (boosting ? BOOST_SPEED : TOP_SPEED) * (k.offroad ? OFFROAD_FACTOR : 1);
+    let maxSpeed = (boosting ? BOOST_SPEED : TOP_SPEED) * k.mods.topSpeed * (k.offroad ? OFFROAD_FACTOR : 1);
     if (k.ai) maxSpeed *= this.aiSpeedFactor(k);
 
     if (boosting) {
       k.boostTime -= dt;
       k.speed += (maxSpeed - k.speed) * Math.min(1, 5 * dt);
     } else if (input.throttle > 0 && k.speed < maxSpeed) {
-      k.speed = Math.min(maxSpeed, k.speed + ACCEL * input.throttle * dt);
+      k.speed = Math.min(maxSpeed, k.speed + ACCEL * k.mods.accel * input.throttle * dt);
     }
     if (input.brake > 0) {
       if (k.speed > 0.4) k.speed -= BRAKE * input.brake * dt;
@@ -561,10 +616,11 @@ export class KartGame {
       } else k.driftTime += dt;
     }
     const speedFactor = Math.min(1, absSpeed / 7) / (1 + absSpeed / 40);
-    let turn = k.steer * TURN_RATE * speedFactor;
+    const turnRate = TURN_RATE * k.mods.turn;
+    let turn = k.steer * turnRate * speedFactor;
     if (k.driftDir !== 0) {
       const into = (k.steer * k.driftDir + 1) / 2; // 0 = counter-steering, 1 = full into the drift
-      turn = k.driftDir * TURN_RATE * speedFactor * (0.9 + 0.9 * into);
+      turn = k.driftDir * turnRate * speedFactor * (0.9 + 0.9 * into);
     }
     if (k.speed < 0) turn = -turn;
     k.heading -= turn * dt;
@@ -834,13 +890,21 @@ export class KartGame {
     let results: RacerResult[] | null = null;
     if (this.phase === "finished") {
       results = ranked.map((k, i) => ({
-        name: k.name,
-        color: "#" + k.color.toString(16).padStart(6, "0"),
+        id: k.character.id,
+        name: k.character.name,
+        color: hexColor(k.character.color),
         time: k.finished ? k.finishTime : null,
         isPlayer: k.isPlayer,
         position: i + 1,
       }));
     }
+    const grid: GridEntry[] = this.karts.map((k) => ({
+      id: k.character.id,
+      name: k.character.name,
+      first: k.character.first,
+      color: hexColor(k.character.color),
+      isPlayer: k.isPlayer,
+    }));
     let countdown = -1;
     if (this.phase === "countdown") countdown = Math.max(1, Math.ceil(3 - this.countdownT));
     else if (this.goShown > 0) countdown = 0;
@@ -860,6 +924,7 @@ export class KartGame {
       drifting: p.driftDir !== 0,
       wrongWay: p.wrongWay && this.phase === "racing",
       results,
+      grid,
     });
   }
 }

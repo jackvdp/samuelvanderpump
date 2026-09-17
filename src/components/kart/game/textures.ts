@@ -31,9 +31,17 @@ export const T = {
   TYRE_SIDE: 21,
   FLOWER: 22,
   ROAD_LINE: 23,
+  STUCCO_WHITE: 24,
+  STUCCO_PINK: 25,
+  STUCCO_BLUE: 26,
+  STUCCO_YELLOW: 27,
+  STUCCO_MINT: 28,
+  WINDOW: 29,
+  DOOR: 30,
+  ROOF: 31,
 } as const;
 
-type RGB = [number, number, number];
+export type RGB = [number, number, number];
 
 // deterministic PRNG so the world looks identical on every load
 export function mulberry32(seed: number) {
@@ -51,7 +59,7 @@ function clamp255(v: number) {
   return v < 0 ? 0 : v > 255 ? 255 : v | 0;
 }
 
-function vary(c: RGB, amount: number, r: number): RGB {
+export function vary(c: RGB, amount: number, r: number): RGB {
   const d = (r - 0.5) * 2 * amount;
   return [clamp255(c[0] + d), clamp255(c[1] + d), clamp255(c[2] + d)];
 }
@@ -181,6 +189,29 @@ export function buildAtlas(): THREE.CanvasTexture {
     if (x >= 6 && x <= 9) return vary([236, 210, 96], 8, r);
     return mortar ? vary([64, 64, 70], 8, r) : vary(road, 16, r);
   });
+
+  // --- Chelsea townhouses: pastel stucco, sash windows, glossy front doors ---
+  const stucco = (base: RGB) => {
+    const course: RGB = [base[0] - 14, base[1] - 14, base[2] - 14];
+    return (_x: number, y: number, r: number) => (y % 4 === 3 ? vary(course, 6, r) : vary(base, 8, r));
+  };
+  fill(T.STUCCO_WHITE, stucco([238, 234, 224]));
+  fill(T.STUCCO_PINK, stucco([238, 190, 200]));
+  fill(T.STUCCO_BLUE, stucco([178, 206, 232]));
+  fill(T.STUCCO_YELLOW, stucco([240, 222, 150]));
+  fill(T.STUCCO_MINT, stucco([190, 226, 200]));
+  fill(T.WINDOW, (x, y, r) => {
+    const frame = x < 2 || x > 13 || y < 2 || y > 13 || x === 7 || x === 8 || y === 7 || y === 8;
+    if (frame) return vary([240, 240, 236], 6, r);
+    return (x + y) % 7 < 2 ? vary([150, 190, 220], 8, r) : vary([64, 84, 118], 10, r);
+  });
+  fill(T.DOOR, (x, y, r) => {
+    if (x < 2 || x > 13 || y < 2) return vary([240, 240, 236], 6, r);
+    if (x === 11 && y === 9) return [226, 186, 84]; // brass knob
+    const panel = x > 3 && x < 12 && y > 3 && y < 14 && (x === 4 || x === 11 || y === 4 || y === 13);
+    return panel ? vary([48, 48, 54], 6, r) : vary([24, 24, 30], 6, r);
+  });
+  fill(T.ROOF, (_x, y, r) => (y % 4 === 0 ? vary([52, 54, 62], 6, r) : vary([78, 80, 90], 10, r)));
 
   ctx.putImageData(img, 0, 0);
   const tex = new THREE.CanvasTexture(canvas);
