@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { buildAtlas } from "./textures";
-import { buildTrack, type Track } from "./track";
-import { buildWorld, B, type World } from "./world";
+import { buildTrack, DECK_MIN, type Track } from "./track";
+import { buildWorld, B, WORLD_X, WORLD_Z, type World } from "./world";
 import { buildKart, disposeSharedKartGeometry, type KartModel } from "./kart-model";
 import { createChannel, mergeInput, KeyboardInput, type InputChannel } from "./input";
 import { GameAudio } from "./audio";
@@ -51,6 +51,8 @@ type Kart = {
   model: KartModel;
   x: number;
   z: number;
+  y: number; // height of the surface under the kart (bridge deck or 0)
+  onDeck: boolean;
   heading: number;
   speed: number;
   vx: number;
@@ -80,8 +82,8 @@ type Kart = {
 };
 
 const TOTAL_LAPS = 3;
-const TOP_SPEED = 24;
-const BOOST_SPEED = 34;
+const TOP_SPEED = 22.5;
+const BOOST_SPEED = 32;
 const BOOST_TIME = 1.5;
 const ACCEL = 13;
 const BRAKE = 30;
@@ -277,7 +279,7 @@ export class KartGame {
     for (let i = 0; i < 16; i++) {
       const m = new THREE.Mesh(this.cloudGeo, this.cloudMat);
       m.scale.set(6 + Math.random() * 12, 1.2, 4 + Math.random() * 8);
-      m.position.set((Math.random() - 0.5) * 220, 24 + Math.random() * 8, (Math.random() - 0.5) * 220);
+      m.position.set((Math.random() - 0.5) * (WORLD_X + 60), 24 + Math.random() * 8, (Math.random() - 0.5) * (WORLD_Z + 80));
       this.scene.add(m);
       this.clouds.push(m);
     }
@@ -391,6 +393,8 @@ export class KartGame {
       model,
       x: 0,
       z: 0,
+      y: 0,
+      onDeck: false,
       heading: 0,
       speed: 0,
       vx: 0,
@@ -460,6 +464,8 @@ export class KartGame {
       const nz = s.tx;
       k.x = s.x + nx * side * 1.8;
       k.z = s.z + nz * side * 1.8;
+      k.y = s.y;
+      k.onDeck = s.y > DECK_MIN;
       k.heading = Math.atan2(s.tx, s.tz);
       k.speed = 0;
       k.vx = 0;
@@ -564,7 +570,8 @@ export class KartGame {
   }
 
   private stepKart(k: Kart, input: InputChannel, dt: number) {
-    const top = this.world.topAt(k.x, k.z);
+    // the deck is plain tarmac; the voxel column below it is irrelevant up there
+    const top = k.onDeck ? B.ROAD : this.world.topAt(k.x, k.z);
     const onRoad = ROAD_BLOCKS.has(top);
     k.offroad = !onRoad;
 
@@ -633,8 +640,21 @@ export class KartGame {
     k.vz += (fz * k.speed - k.vz) * blend;
 
     k.bumpCooldown -= dt;
-    const blockedX = !this.tryMove(k, k.vx * dt, 0);
-    const blockedZ = !this.tryMove(k, 0, k.vz * dt);
+    if (k.onDeck) {
+      // scraping the flyover barrier scrubs speed but never stops the kart dead
+      const scraped = !this.tryMove(k, k.vx * dt, k.vz * dt);
+      if (scraped) {
+        k.speed *= 1 - Math.min(1, 1.8 * dt);
+        if (Math.abs(k.speed) > 6 && k.bumpCooldown <= 0) {
+          k.bumpCooldown = 0.35;
+          if (k.isPlayer) this.audio.bump();
+          for (let i = 0; i < 4; i++)
+            this.particles.spawn(k.x, k.y + 0.4, k.z, this.dustGrey, 3, 2.5, 0.16, 0.5);
+        }
+      }
+    }
+    const blockedX = k.onDeck ? false : !this.tryMove(k, k.vx * dt, 0);
+    const blockedZ = k.onDeck ? false : !this.tryMove(k, 0, k.vz * dt);
     if (blockedX || blockedZ) {
       if (blockedX) k.vx *= -0.3;
       if (blockedZ) k.vz *= -0.3;
@@ -642,7 +662,7 @@ export class KartGame {
         k.bumpCooldown = 0.35;
         if (k.isPlayer) this.audio.bump();
         for (let i = 0; i < 6; i++)
-          this.particles.spawn(k.x + fx * 0.8, 0.4, k.z + fz * 0.8, this.dustGrey, 4, 3, 0.2, 0.6);
+          this.particles.spawn(k.x + fx * 0.8, k.y + 0.4, k.z + fz * 0.8, this.dustGrey, 4, 3, 0.2, 0.6);
       }
       k.speed *= 0.45;
     }
@@ -652,10 +672,10 @@ export class KartGame {
       const rate = k.driftDir !== 0 ? 0.35 : k.offroad ? 0.3 : 0;
       if (rate > 0 && Math.random() < rate) {
         const color = k.offroad ? (top === B.SAND ? this.dustSand : this.dustGrass) : this.dustGrey;
-        this.particles.spawn(k.x - fx * 0.8 + (Math.random() - 0.5), 0.15, k.z - fz * 0.8 + (Math.random() - 0.5), color, 3, 2.5, 0.22, 0.7);
+        this.particles.spawn(k.x - fx * 0.8 + (Math.random() - 0.5), k.y + 0.15, k.z - fz * 0.8 + (Math.random() - 0.5), color, 3, 2.5, 0.22, 0.7);
       }
       if (boosting && Math.random() < 0.6) {
-        this.particles.spawn(k.x - fx * 1.4, 0.35, k.z - fz * 1.4, this.dustBoost, 2, 1.5, 0.16, 0.35);
+        this.particles.spawn(k.x - fx * 1.4, k.y + 0.35, k.z - fz * 1.4, this.dustBoost, 2, 1.5, 0.16, 0.35);
       }
     }
     k.wheelSpin += (k.speed / 0.25) * dt;
@@ -672,9 +692,36 @@ export class KartGame {
     );
   }
 
+  // On the flyover the barriers are the only limit. Rather than refusing a
+  // move that would cross one, the kart is pushed back inside the deck and
+  // its outward velocity is cancelled, so it scrapes along the wall instead
+  // of sticking to it. Returns true when the barrier had to intervene.
+  private clampToDeck(k: Kart) {
+    const s = this.track.samples[k.trackIdx];
+    const nx = -s.tz;
+    const nz = s.tx;
+    const lat = (k.x - s.x) * nx + (k.z - s.z) * nz;
+    const limit = this.track.halfWidth - KART_RADIUS * 0.8 - 0.15;
+    if (Math.abs(lat) <= limit) return false;
+    const over = lat - Math.sign(lat) * limit;
+    k.x -= nx * over;
+    k.z -= nz * over;
+    const vOut = k.vx * nx + k.vz * nz;
+    if (vOut * Math.sign(lat) > 0) {
+      k.vx -= vOut * nx;
+      k.vz -= vOut * nz;
+    }
+    return true;
+  }
+
   private tryMove(k: Kart, dx: number, dz: number) {
     const nx = k.x + dx;
     const nz = k.z + dz;
+    if (k.onDeck) {
+      k.x = nx;
+      k.z = nz;
+      return !this.clampToDeck(k);
+    }
     if (this.canStand(nx, nz)) {
       k.x = nx;
       k.z = nz;
@@ -689,6 +736,7 @@ export class KartGame {
       for (let j = i + 1; j < this.karts.length; j++) {
         const a = this.karts[i];
         const b = this.karts[j];
+        if (Math.abs(a.y - b.y) > 1.5) continue; // one is on the bridge, one under it
         const dx = b.x - a.x;
         const dz = b.z - a.z;
         const d = Math.hypot(dx, dz);
@@ -723,6 +771,15 @@ export class KartGame {
     const n = this.track.count;
     k.trackIdx = this.track.nearestIndex(k.x, k.z, k.trackIdx);
     const frac = k.trackIdx / n;
+
+    // ride height follows the track profile, interpolated between samples
+    {
+      const a = this.track.samples[k.trackIdx];
+      const b = this.track.samples[(k.trackIdx + 1) % n];
+      const t = Math.max(0, Math.min(1, ((k.x - a.x) * a.tx + (k.z - a.z) * a.tz) / this.track.spacing));
+      k.y = a.y + (b.y - a.y) * t;
+      k.onDeck = k.y > DECK_MIN;
+    }
     if (frac > 0.25 && frac < 0.5) k.checkpoints |= 1;
     if (frac > 0.5 && frac < 0.75 && k.checkpoints & 1) k.checkpoints |= 2;
     if (frac > 0.75 && k.checkpoints & 2) k.checkpoints |= 4;
@@ -803,21 +860,28 @@ export class KartGame {
       return;
     }
 
-    const lookahead = Math.round((5 + absSpeed * 0.45) * 2);
-    const target = this.track.samples[(k.trackIdx + lookahead) % n];
-    const lane = 2.2 * Math.sin(this.raceTime * 0.3 + ai.phase);
+    // aim at a point down the road; look less far ahead where the track
+    // bends hard so hairpins are not cut across the grass
+    const far = this.track.samples[(k.trackIdx + 24) % n];
+    const near = this.track.samples[k.trackIdx];
+    const bend = Math.abs(wrapAngle(Math.atan2(far.tx, far.tz) - Math.atan2(near.tx, near.tz)));
+    const lookahead = Math.round((4 + absSpeed * 0.4) * 2 * (1 - 0.5 * Math.min(1, bend / 1.6)));
+    const target = this.track.samples[(k.trackIdx + Math.max(6, lookahead)) % n];
+    const lane = 1.5 * Math.sin(this.raceTime * 0.3 + ai.phase) * (1 - 0.7 * Math.min(1, bend / 1.6));
     const tx = target.x - target.tz * lane;
     const tz = target.z + target.tx * lane;
     const desired = Math.atan2(tx - k.x, tz - k.z);
     const diff = wrapAngle(desired - k.heading);
     inp.steer = Math.max(-1, Math.min(1, -diff * 2.6));
     inp.throttle = 1;
-    inp.brake = Math.abs(diff) > 1.1 && absSpeed > 13 ? 1 : 0;
+    // brake into the tight stuff: a sharp bend coming up, or the nose already
+    // pointing well off the line at speed
+    inp.brake = (Math.abs(diff) > 0.9 && absSpeed > 11) || (bend > 1.3 && absSpeed > 15) ? 1 : 0;
     inp.drift = ai.skill > 0.9 && Math.abs(diff) > 0.45 && absSpeed > 12 && !k.offroad;
   }
 
   private syncModel(k: Kart) {
-    k.model.root.position.set(k.x, 0, k.z);
+    k.model.root.position.set(k.x, k.y, k.z);
     k.model.root.rotation.y = k.heading;
   }
 
@@ -841,7 +905,7 @@ export class KartGame {
     }
     for (const c of this.clouds) {
       c.position.x += dt * 1.2;
-      if (c.position.x > 120) c.position.x = -120;
+      if (c.position.x > WORLD_X / 2 + 30) c.position.x = -WORLD_X / 2 - 30;
     }
   }
 
@@ -860,15 +924,15 @@ export class KartGame {
     let look: THREE.Vector3;
     if (this.phase === "ready") {
       this.orbit += dt * 0.25;
-      desired = new THREE.Vector3(k.x + Math.sin(this.orbit) * 8, 3.2, k.z + Math.cos(this.orbit) * 8);
-      look = new THREE.Vector3(k.x, 0.9, k.z);
+      desired = new THREE.Vector3(k.x + Math.sin(this.orbit) * 8, k.y + 3.2, k.z + Math.cos(this.orbit) * 8);
+      look = new THREE.Vector3(k.x, k.y + 0.9, k.z);
     } else {
       const fx = Math.sin(k.heading);
       const fz = Math.cos(k.heading);
       const back = portrait ? 7.5 : 6.5;
       const height = portrait ? 3.4 : 2.9;
-      desired = new THREE.Vector3(k.x - fx * back, height, k.z - fz * back);
-      look = new THREE.Vector3(k.x + fx * 4, 0.9, k.z + fz * 4);
+      desired = new THREE.Vector3(k.x - fx * back, k.y + height, k.z - fz * back);
+      look = new THREE.Vector3(k.x + fx * 4, k.y + 0.9, k.z + fz * 4);
     }
     if (!this.camInit) {
       this.camPos.copy(desired);

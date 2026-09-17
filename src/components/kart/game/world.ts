@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { T, tileUV, mulberry32 } from "./textures";
-import { BOOST_PADS, type Track } from "./track";
+import { BOOST_PADS, DECK_MIN, type Track } from "./track";
 
 export const B = {
   AIR: 0,
@@ -58,13 +58,16 @@ const FACE_TILES: Record<number, [number, number, number]> = {
   [B.ROOF]: [T.ROOF, T.ROOF, T.ROOF],
 };
 
-export const WORLD_SIZE = 144;
+// The circuit is long and thin, so the world is too (blocks along x and z).
+export const WORLD_X = 336;
+export const WORLD_Z = 112;
 const Y_MIN = -4;
 const Y_SIZE = 18;
 const CHUNK = 36;
 
 export type World = {
-  size: number;
+  sizeX: number;
+  sizeZ: number;
   x0: number;
   z0: number;
   surface: Int8Array; // surface height per column (0 = flat race level)
@@ -116,47 +119,54 @@ function valueNoise(x: number, z: number, seed: number) {
 }
 
 export function buildWorld(track: Track, atlas: THREE.Texture): World {
-  const size = WORLD_SIZE;
-  const x0 = -size / 2;
-  const z0 = -size / 2;
+  const sizeX = WORLD_X;
+  const sizeZ = WORLD_Z;
+  const x0 = -sizeX / 2;
+  const z0 = -sizeZ / 2;
   const halfW = track.halfWidth;
-  const cols = size * size;
+  const cols = sizeX * sizeZ;
+  const inBounds = (gx: number, gz: number) => gx >= 0 && gz >= 0 && gx < sizeX && gz < sizeZ;
 
-  const voxels = new Uint8Array(size * Y_SIZE * size);
-  const vIndex = (gx: number, y: number, gz: number) =>
-    ((gx * Y_SIZE + (y - Y_MIN)) * size + gz);
+  const voxels = new Uint8Array(sizeX * Y_SIZE * sizeZ);
+  const vIndex = (gx: number, y: number, gz: number) => (gx * Y_SIZE + (y - Y_MIN)) * sizeZ + gz;
   const get = (gx: number, y: number, gz: number) => {
-    if (gx < 0 || gz < 0 || gx >= size || gz >= size) return B.STONE; // world edge: solid
+    if (!inBounds(gx, gz)) return B.STONE; // world edge: solid
     if (y < Y_MIN) return B.BEDROCK;
     if (y >= Y_MIN + Y_SIZE) return B.AIR;
     return voxels[vIndex(gx, y, gz)];
   };
   const set = (gx: number, y: number, gz: number, b: number) => {
-    if (gx < 0 || gz < 0 || gx >= size || gz >= size) return;
+    if (!inBounds(gx, gz)) return;
     if (y < Y_MIN || y >= Y_MIN + Y_SIZE) return;
     voxels[vIndex(gx, y, gz)] = b;
   };
 
-  // --- distance field to the track centre line ---
+  // --- distance fields to the track centre line ---
+  // `dist` counts every sample (it keeps terrain, trees and houses clear of
+  // any flyover); `distG` counts only ground-level samples and is what the
+  // road itself is rasterised from.
   const dist = new Float32Array(cols).fill(Infinity);
+  const distG = new Float32Array(cols).fill(Infinity);
   const nearIdx = new Int32Array(cols);
   const R = halfW + 3;
   for (let i = 0; i < track.count; i++) {
     const s = track.samples[i];
+    const ground = s.y < DECK_MIN + 0.2;
     const gxc = s.x - x0;
     const gzc = s.z - z0;
     const gxa = Math.max(0, Math.floor(gxc - R));
-    const gxb = Math.min(size - 1, Math.ceil(gxc + R));
+    const gxb = Math.min(sizeX - 1, Math.ceil(gxc + R));
     const gza = Math.max(0, Math.floor(gzc - R));
-    const gzb = Math.min(size - 1, Math.ceil(gzc + R));
+    const gzb = Math.min(sizeZ - 1, Math.ceil(gzc + R));
     for (let gx = gxa; gx <= gxb; gx++) {
       for (let gz = gza; gz <= gzb; gz++) {
         const dx = gx + 0.5 - gxc;
         const dz = gz + 0.5 - gzc;
         const d = Math.sqrt(dx * dx + dz * dz);
-        const ci = gx * size + gz;
-        if (d < dist[ci]) {
-          dist[ci] = d;
+        const ci = gx * sizeZ + gz;
+        if (d < dist[ci]) dist[ci] = d;
+        if (ground && d < distG[ci]) {
+          distG[ci] = d;
           nearIdx[ci] = i;
         }
       }
@@ -172,10 +182,10 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
   const topRot = new Uint8Array(cols);
   const water = new Uint8Array(cols);
 
-  for (let gx = 0; gx < size; gx++) {
-    for (let gz = 0; gz < size; gz++) {
-      const ci = gx * size + gz;
-      const d = dist[ci];
+  for (let gx = 0; gx < sizeX; gx++) {
+    for (let gz = 0; gz < sizeZ; gz++) {
+      const ci = gx * sizeZ + gz;
+      const d = distG[ci];
       const wx = gx + x0 + 0.5;
       const wz = gz + z0 + 0.5;
       let top: number = B.GRASS;
@@ -197,7 +207,8 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
         const sample = track.samples[nearIdx[ci]];
         top = Math.floor(sample.s / 2) % 2 === 0 ? B.KERB_RED : B.KERB_WHITE;
       } else {
-        const f = d === Infinity ? 1 : smoothstep((d - (halfW + 2.5)) / 9);
+        const dAll = dist[ci];
+        const f = dAll === Infinity ? 1 : smoothstep((dAll - (halfW + 2.5)) / 9);
         const n = valueNoise(wx, wz, 7);
         const hN = Math.round(n * 5.5 * f);
         if (hN >= 1) {
@@ -218,15 +229,15 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
   }
 
   // sandy shores next to water
-  for (let gx = 0; gx < size; gx++) {
-    for (let gz = 0; gz < size; gz++) {
-      const ci = gx * size + gz;
-      if (surface[ci] !== 0 || topBlock[ci] !== B.GRASS && topBlock[ci] !== B.FLOWER) continue;
+  for (let gx = 0; gx < sizeX; gx++) {
+    for (let gz = 0; gz < sizeZ; gz++) {
+      const ci = gx * sizeZ + gz;
+      if (surface[ci] !== 0 || (topBlock[ci] !== B.GRASS && topBlock[ci] !== B.FLOWER)) continue;
       const near =
-        (gx > 0 && water[ci - size]) ||
-        (gx < size - 1 && water[ci + size]) ||
+        (gx > 0 && water[ci - sizeZ]) ||
+        (gx < sizeX - 1 && water[ci + sizeZ]) ||
         (gz > 0 && water[ci - 1]) ||
-        (gz < size - 1 && water[ci + 1]);
+        (gz < sizeZ - 1 && water[ci + 1]);
       if (near) topBlock[ci] = B.SAND;
     }
   }
@@ -236,20 +247,20 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
   const treeMark = new Uint8Array(cols);
   const HOUSE_W = 5; // square footprint
   const HOUSE_H = 6; // storeys of wall, flat roof on top
-  const MAX_HOUSES = 16;
+  const MAX_HOUSES = 24;
   const houseSites: { gx: number; gz: number; frontX: number; frontZ: number; wall: number }[] = [];
   {
     const WALLS = [B.HOUSE_WHITE, B.HOUSE_PINK, B.HOUSE_BLUE, B.HOUSE_YELLOW, B.HOUSE_MINT, B.HOUSE_WHITE];
     const hrand = mulberry32(9001);
     const W = HOUSE_W;
-    for (let gx = 3; gx < size - 3 - W && houseSites.length < MAX_HOUSES; gx++) {
-      for (let gz = 3; gz < size - 3 - W && houseSites.length < MAX_HOUSES; gz++) {
+    for (let gx = 3; gx < sizeX - 3 - W && houseSites.length < MAX_HOUSES; gx++) {
+      for (let gz = 3; gz < sizeZ - 3 - W && houseSites.length < MAX_HOUSES; gz++) {
         if (hash2(gx, gz, 33) > 0.12) continue;
         // gentle ground, no water, close to the road but off the racing line
         let ok = true;
         for (let ax = -2; ax <= W + 1 && ok; ax++) {
           for (let az = -2; az <= W + 1; az++) {
-            const ci = (gx + ax) * size + gz + az;
+            const ci = (gx + ax) * sizeZ + gz + az;
             const inside = ax >= 0 && ax < W && az >= 0 && az < W;
             if (
               surface[ci] < 0 ||
@@ -266,7 +277,7 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
         if (!ok) continue;
         for (let ax = -2; ax <= W + 1; ax++) {
           for (let az = -2; az <= W + 1; az++) {
-            const ci = (gx + ax) * size + gz + az;
+            const ci = (gx + ax) * sizeZ + gz + az;
             surface[ci] = 0;
             drivable[ci] = 1;
             if (topBlock[ci] !== B.FLOWER) topBlock[ci] = B.GRASS;
@@ -276,10 +287,10 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
         // front door on the side facing the road
         const mid = Math.floor(W / 2);
         const sides = [
-          { d: dist[(gx - 1) * size + gz + mid], x: 0, z: mid },
-          { d: dist[(gx + W) * size + gz + mid], x: W - 1, z: mid },
-          { d: dist[(gx + mid) * size + gz - 1], x: mid, z: 0 },
-          { d: dist[(gx + mid) * size + gz + W], x: mid, z: W - 1 },
+          { d: dist[(gx - 1) * sizeZ + gz + mid], x: 0, z: mid },
+          { d: dist[(gx + W) * sizeZ + gz + mid], x: W - 1, z: mid },
+          { d: dist[(gx + mid) * sizeZ + gz - 1], x: mid, z: 0 },
+          { d: dist[(gx + mid) * sizeZ + gz + W], x: mid, z: W - 1 },
         ];
         const front = sides.reduce((a, b) => (b.d < a.d ? b : a));
         houseSites.push({ gx, gz, frontX: front.x, frontZ: front.z, wall: WALLS[Math.floor(hrand() * WALLS.length)] });
@@ -288,9 +299,9 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
   }
 
   // --- fill columns ---
-  for (let gx = 0; gx < size; gx++) {
-    for (let gz = 0; gz < size; gz++) {
-      const ci = gx * size + gz;
+  for (let gx = 0; gx < sizeX; gx++) {
+    for (let gz = 0; gz < sizeZ; gz++) {
+      const ci = gx * sizeZ + gz;
       const h = surface[ci];
       const top = topBlock[ci];
       const topY = h - 1;
@@ -324,7 +335,7 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
           set(gx + ax, y, gz + az, b);
         }
         set(gx + ax, HOUSE_H, gz + az, B.ROOF);
-        const ci = (gx + ax) * size + gz + az;
+        const ci = (gx + ax) * sizeZ + gz + az;
         drivable[ci] = 0;
         topBlock[ci] = wall;
       }
@@ -333,9 +344,9 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
 
   // --- trees ---
   const rand = mulberry32(4242);
-  for (let gx = 2; gx < size - 2; gx++) {
-    for (let gz = 2; gz < size - 2; gz++) {
-      const ci = gx * size + gz;
+  for (let gx = 2; gx < sizeX - 2; gx++) {
+    for (let gz = 2; gz < sizeZ - 2; gz++) {
+      const ci = gx * sizeZ + gz;
       if (topBlock[ci] !== B.GRASS && topBlock[ci] !== B.FLOWER) continue;
       if (surface[ci] < 0 || dist[ci] < halfW + 6) continue;
       if (treeMark[ci]) continue;
@@ -348,7 +359,7 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
         for (let az = -3; az <= 3; az++) {
           const nx = gx + ax;
           const nz = gz + az;
-          if (nx >= 0 && nz >= 0 && nx < size && nz < size) treeMark[nx * size + nz] = 1;
+          if (inBounds(nx, nz)) treeMark[nx * sizeZ + nz] = 1;
         }
       const topY = base + th - 1;
       for (let ly = topY - 2; ly <= topY + 1; ly++) {
@@ -367,6 +378,39 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
     }
   }
 
+  // --- flyover supports (only when the track has an elevated section): an
+  // earth bank where the deck is low, pillars once there is room to drive
+  // underneath ---
+  {
+    const deckIdx: number[] = [];
+    for (let i = 0; i < track.count; i++) if (track.samples[i].y > 0.03) deckIdx.push(i);
+    const support = (px: number, pz: number, topY: number, block: number) => {
+      const gx = Math.floor(px - x0);
+      const gz = Math.floor(pz - z0);
+      if (!inBounds(gx, gz)) return;
+      const ci = gx * sizeZ + gz;
+      if (distG[ci] < halfW + 1.2) return; // never block the road below
+      for (let y = 0; y <= topY; y++) set(gx, y, gz, block);
+      drivable[ci] = 0;
+    };
+    for (const i of deckIdx) {
+      const s = track.samples[i];
+      const nx = -s.tz;
+      const nz = s.tx;
+      const bottom = s.y - 0.8;
+      const topY = Math.ceil(bottom) - 1;
+      if (topY < 0) continue;
+      if (s.y < 3) {
+        // too low to pass under: solid bank across the full deck width
+        for (let lat = -halfW - 0.5; lat <= halfW + 0.5; lat += 0.5)
+          support(s.x + nx * lat, s.z + nz * lat, topY, B.DIRT);
+      } else if (i % 8 === 0) {
+        support(s.x + nx * (halfW + 0.2), s.z + nz * (halfW + 0.2), topY, B.STONE);
+        support(s.x - nx * (halfW + 0.2), s.z - nz * (halfW + 0.2), topY, B.STONE);
+      }
+    }
+  }
+
   // --- start/finish gantry ---
   {
     const s0 = track.samples[0];
@@ -382,12 +426,11 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
       const gz = Math.floor(pz - z0);
       for (let y = 0; y <= 4; y++) set(gx, y, gz, B.LOG);
       set(gx, 5, gz, B.PLANKS);
-      const ci = gx * size + gz;
-      if (ci >= 0 && ci < cols) drivable[ci] = 0;
+      if (inBounds(gx, gz)) drivable[gx * sizeZ + gz] = 0;
     };
     pillar(ax, az);
     pillar(bx, bz);
-    const steps = Math.ceil(off * 2 / 0.25);
+    const steps = Math.ceil((off * 2) / 0.25);
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
       const px = ax + (bx - ax) * t;
@@ -420,16 +463,16 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
 
   const solidAt = (gx: number, y: number, gz: number) => get(gx, y, gz) !== B.AIR;
 
-  for (let cx = 0; cx < size; cx += CHUNK) {
-    for (let cz = 0; cz < size; cz += CHUNK) {
+  for (let cx = 0; cx < sizeX; cx += CHUNK) {
+    for (let cz = 0; cz < sizeZ; cz += CHUNK) {
       const pos: number[] = [];
       const uvs: number[] = [];
       const col: number[] = [];
       const idx: number[] = [];
       let vcount = 0;
-      for (let gx = cx; gx < Math.min(size, cx + CHUNK); gx++) {
-        for (let gz = cz; gz < Math.min(size, cz + CHUNK); gz++) {
-          const ci = gx * size + gz;
+      for (let gx = cx; gx < Math.min(sizeX, cx + CHUNK); gx++) {
+        for (let gz = cz; gz < Math.min(sizeZ, cz + CHUNK); gz++) {
+          const ci = gx * sizeZ + gz;
           for (let y = Y_MIN; y < Y_MIN + Y_SIZE; y++) {
             const b = voxels[vIndex(gx, y, gz)];
             if (b === B.AIR) continue;
@@ -500,15 +543,81 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
     }
   }
 
+  // --- flyover deck (only when the track has an elevated section): a smooth
+  // ribbon along the elevated samples, with a slab underneath and a low
+  // barrier either side ---
+  {
+    const hw = halfW;
+    const pos: number[] = [];
+    const uvs: number[] = [];
+    const col: number[] = [];
+    const idx: number[] = [];
+    let vcount = 0;
+    const at = (s: (typeof track.samples)[number], lat: number, dy: number): [number, number, number] => [
+      s.x - s.tz * lat,
+      s.y + dy,
+      s.z + s.tx * lat,
+    ];
+    // one quad per segment between (latA, dyA) and (latB, dyB) across the deck
+    const strip = (i: number, latA: number, dyA: number, latB: number, dyB: number, tile: number, shade: number) => {
+      const a = track.samples[i];
+      const b = track.samples[(i + 1) % track.count];
+      const [u0, v0, u1, v1] = tileUV(tile);
+      // walk the 16px tile in quarter slices so the texture tiles seamlessly
+      const q = i % 4;
+      const ua = u0 + (u1 - u0) * (q / 4);
+      const ub = u0 + (u1 - u0) * ((q + 1) / 4);
+      const verts = [at(a, latA, dyA), at(a, latB, dyB), at(b, latB, dyB), at(b, latA, dyA)];
+      const uv = [
+        [ua, v0],
+        [ua, v1],
+        [ub, v1],
+        [ub, v0],
+      ];
+      for (let k = 0; k < 4; k++) {
+        pos.push(...verts[k]);
+        uvs.push(uv[k][0], uv[k][1]);
+        col.push(shade, shade, shade);
+      }
+      idx.push(vcount, vcount + 2, vcount + 1, vcount, vcount + 3, vcount + 2);
+      vcount += 4;
+    };
+    for (let i = 0; i < track.count; i++) {
+      const a = track.samples[i];
+      const b = track.samples[(i + 1) % track.count];
+      if (a.y <= 0.03 && b.y <= 0.03) continue;
+      strip(i, -hw, 0, hw, 0, T.ROAD, 1); // deck
+      strip(i, -hw - 0.5, 0.7, -hw, 0.7, T.KERB_WHITE, 0.95); // barrier tops
+      strip(i, hw, 0.7, hw + 0.5, 0.7, T.KERB_WHITE, 0.95);
+      strip(i, -hw, 0.7, -hw, 0, T.KERB_RED, 0.7); // barrier inner faces
+      strip(i, hw, 0, hw, 0.7, T.KERB_RED, 0.7);
+      strip(i, -hw - 0.5, -0.8, -hw - 0.5, 0.7, T.STONE, 0.64); // outer faces
+      strip(i, hw + 0.5, 0.7, hw + 0.5, -0.8, T.STONE, 0.64);
+      strip(i, hw + 0.5, -0.8, -hw - 0.5, -0.8, T.STONE, 0.5); // underside
+    }
+    if (vcount > 0) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      geo.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+      geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+      geo.setIndex(idx);
+      geo.computeBoundingSphere();
+      geometries.push(geo);
+      const deck = new THREE.Mesh(geo, material);
+      group.add(deck);
+    }
+  }
+
   const columnIndex = (x: number, z: number) => {
     const gx = Math.floor(x - x0);
     const gz = Math.floor(z - z0);
-    if (gx < 0 || gz < 0 || gx >= size || gz >= size) return -1;
-    return gx * size + gz;
+    if (!inBounds(gx, gz)) return -1;
+    return gx * sizeZ + gz;
   };
 
   return {
-    size,
+    sizeX,
+    sizeZ,
     x0,
     z0,
     surface,
