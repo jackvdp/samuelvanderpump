@@ -51,6 +51,7 @@ export default function Navigation() {
 
         {/* Top Right - Contact & Social Icons */}
         <div className="pointer-events-auto flex items-center gap-6">
+          <NavItem href="/kart">Play</NavItem>
           <NavItem href="mailto:info@bnocagency.com">Contact</NavItem>
           
           {/* Social Media Icons */}
