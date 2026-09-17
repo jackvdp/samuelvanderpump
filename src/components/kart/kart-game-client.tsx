@@ -4,8 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { KartGame, type HudState } from "./game/game";
 import { createChannel, type InputChannel } from "./game/input";
+import { characterById } from "./game/characters";
 import { Hud } from "./hud";
 import { TouchControls } from "./touch-controls";
+
+const DRIVER_KEY = "chelsea-kart:driver";
 
 const initialHud: HudState = {
   phase: "ready",
@@ -22,12 +25,21 @@ const initialHud: HudState = {
   drifting: false,
   wrongWay: false,
   results: null,
+  grid: [],
 };
 
 type WakeLockSentinel = { release: () => Promise<void> };
 type WakeLockNavigator = Navigator & {
   wakeLock?: { request: (type: "screen") => Promise<WakeLockSentinel> };
 };
+
+function rememberedDriver() {
+  try {
+    return characterById(localStorage.getItem(DRIVER_KEY)).id;
+  } catch {
+    return characterById(null).id;
+  }
+}
 
 export default function KartGameClient() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,6 +52,8 @@ export default function KartGameClient() {
   const [failed, setFailed] = useState(false);
   // this component is only ever rendered on the client (ssr: false), so it is
   // safe to read browser APIs in the initial state
+  const [driverId, setDriverId] = useState(rememberedDriver);
+  const driverRef = useRef(driverId);
   const [isTouch] = useState(
     () => window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0
   );
@@ -52,16 +66,21 @@ export default function KartGameClient() {
     if (!canvas) return;
     let game: KartGame;
     try {
-      game = new KartGame({ canvas, onHud: setHud, touch: touchChannel.current });
+      game = new KartGame({
+        canvas,
+        onHud: setHud,
+        touch: touchChannel.current,
+        character: driverRef.current,
+      });
     } catch (err) {
-      console.error("Block Kart failed to start", err);
+      console.error("Chelsea Kart failed to start", err);
       const t = setTimeout(() => setFailed(true), 0);
       return () => clearTimeout(t);
     }
     gameRef.current = game;
     if (process.env.NODE_ENV === "development") {
       // handy for poking at the simulation from the console / e2e scripts
-      (window as unknown as { __blockKart?: KartGame }).__blockKart = game;
+      (window as unknown as { __chelseaKart?: KartGame }).__chelseaKart = game;
     }
 
     const onResize = () => game.resize();
@@ -111,8 +130,20 @@ export default function KartGameClient() {
     };
   }, [hud.phase]);
 
+  const selectDriver = useCallback((id: string) => {
+    const c = characterById(id);
+    driverRef.current = c.id;
+    setDriverId(c.id);
+    gameRef.current?.selectCharacter(c.id);
+    try {
+      localStorage.setItem(DRIVER_KEY, c.id);
+    } catch {
+      // private mode etc. — the choice just won't stick between visits
+    }
+  }, []);
   const start = useCallback(() => gameRef.current?.start(), []);
   const restart = useCallback(() => gameRef.current?.restart(), []);
+  const changeDriver = useCallback(() => gameRef.current?.backToLobby(), []);
   const toggleMute = useCallback(() => {
     setMuted((m) => {
       gameRef.current?.setMuted(!m);
@@ -131,7 +162,7 @@ export default function KartGameClient() {
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-nero px-6 text-center text-white">
         <p className="font-pixel text-lg text-yellow-300">NO WEBGL</p>
         <p className="mt-4 max-w-sm text-white/75">
-          Block Kart needs WebGL, which this browser has turned off. Try another browser or device.
+          Chelsea Kart needs WebGL, which this browser has turned off. Try another browser or device.
         </p>
         <Link href="/" className="mt-6 underline underline-offset-4">
           Back to the site
@@ -155,8 +186,11 @@ export default function KartGameClient() {
         muted={muted}
         fullscreen={fullscreen}
         fullscreenAvailable={fullscreenAvailable}
+        selectedId={driverId}
+        onSelect={selectDriver}
         onStart={start}
         onRestart={restart}
+        onChangeDriver={changeDriver}
         onToggleMute={toggleMute}
         onToggleFullscreen={toggleFullscreen}
       />

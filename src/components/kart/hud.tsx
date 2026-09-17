@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { ArrowLeft, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 import type { HudState } from "./game/game";
+import { CHARACTERS, characterById, type Character } from "./game/characters";
+import { faceDataUrl } from "./game/driver-texture";
 import { cn } from "@/lib/utils";
 
 export function formatTime(t: number) {
@@ -15,6 +17,10 @@ export function formatTime(t: number) {
 function ordinal(n: number) {
   const suffix = n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
   return { n, suffix };
+}
+
+function hexColor(c: number) {
+  return "#" + c.toString(16).padStart(6, "0");
 }
 
 function PixelButton({
@@ -40,14 +46,67 @@ function PixelButton({
   );
 }
 
+function Face({ c, className }: { c: Character; className?: string }) {
+  // a data URL generated on the client; next/image adds nothing here
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={faceDataUrl(c)}
+      alt=""
+      width={16}
+      height={16}
+      draggable={false}
+      className={cn("shrink-0 border-2 border-black/60 [image-rendering:pixelated]", className)}
+    />
+  );
+}
+
+function StatBar({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-7 text-[7px] text-white/70 sm:text-[8px]">{label}</span>
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <span
+            key={i}
+            className={cn("size-2 border border-black/60 sm:size-2.5", i <= value ? "bg-yellow-300" : "bg-white/20")}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DriverCard({ c, selected, onSelect }: { c: Character; selected: boolean; onSelect: (id: string) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(c.id)}
+      aria-pressed={selected}
+      aria-label={`Race as ${c.name}`}
+      className={cn(
+        "flex flex-col items-center gap-1 rounded-md border-4 p-1.5 transition-transform",
+        selected ? "scale-105 border-yellow-300 bg-white/25" : "border-black/60 bg-black/30 hover:bg-white/10"
+      )}
+      style={{ boxShadow: `inset 0 -5px 0 ${hexColor(c.color)}` }}
+    >
+      <Face c={c} className="size-9 sm:size-10" />
+      <span className="max-w-full text-[6px] leading-tight break-words sm:text-[7px]">{c.first}</span>
+    </button>
+  );
+}
+
 type Props = {
   state: HudState;
   isTouch: boolean;
   muted: boolean;
   fullscreen: boolean;
   fullscreenAvailable: boolean;
+  selectedId: string;
+  onSelect: (id: string) => void;
   onStart: () => void;
   onRestart: () => void;
+  onChangeDriver: () => void;
   onToggleMute: () => void;
   onToggleFullscreen: () => void;
 };
@@ -58,14 +117,19 @@ export function Hud({
   muted,
   fullscreen,
   fullscreenAvailable,
+  selectedId,
+  onSelect,
   onStart,
   onRestart,
+  onChangeDriver,
   onToggleMute,
   onToggleFullscreen,
 }: Props) {
   const racing = state.phase === "racing" || state.phase === "countdown" || state.phase === "finished";
   const pos = ordinal(state.position);
   const shadow = "[text-shadow:3px_3px_0_rgba(0,0,0,0.55)]";
+  const selected = characterById(selectedId);
+  const rivals = state.grid.filter((g) => !g.isPlayer);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 font-pixel text-white">
@@ -152,24 +216,51 @@ export function Hud({
         )}
       </div>
 
-      {/* start screen */}
+      {/* lobby: title + driver select */}
       {state.phase === "ready" && (
         <div className="pointer-events-auto absolute inset-0 flex overflow-y-auto bg-black/35 backdrop-blur-[2px] touch-pan-y">
-          <div className="m-auto flex flex-col items-center px-6 py-8 text-center landscape:py-4">
+          <div className="m-auto flex w-full max-w-lg flex-col items-center px-4 py-8 text-center landscape:py-4">
             <p className="mb-3 text-[10px] tracking-widest text-white/80 sm:text-xs landscape:mb-2">
               SAMUEL VANDERPUMP PRESENTS
             </p>
             <h1 className={cn("text-4xl leading-tight text-yellow-300 sm:text-6xl landscape:text-3xl landscape:sm:text-5xl", shadow)}>
-              BLOCK
+              CHELSEA
               <br className="landscape:hidden" /> KART
             </h1>
-            <p className="mt-5 max-w-md font-sans text-sm text-white/85 sm:text-base landscape:mt-3">
-              Three laps around a blocky island. Hit the gold pads for a boost and hold drift through the corners.
-            </p>
-            <PixelButton onClick={onStart} className="mt-8 animate-pulse text-base sm:text-lg landscape:mt-4">
-              {isTouch ? "TAP TO RACE" : "PRESS ENTER"}
+            <p className="mt-4 text-[9px] tracking-widest text-white/80 sm:text-[10px] landscape:mt-2">PICK YOUR DRIVER</p>
+
+            <div className="mt-3 grid w-full grid-cols-5 gap-1.5 sm:gap-2">
+              {CHARACTERS.map((c) => (
+                <DriverCard key={c.id} c={c} selected={c.id === selectedId} onSelect={onSelect} />
+              ))}
+            </div>
+
+            <div className="mt-3 flex w-full items-center gap-3 rounded-md border-2 border-black/60 bg-black/35 p-3 text-left">
+              <Face c={selected} className="size-14 sm:size-16" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="size-3 shrink-0 border-2 border-black/60" style={{ background: hexColor(selected.color) }} />
+                  <span className="truncate text-[10px] sm:text-xs">{selected.name}</span>
+                </div>
+                <p className="mt-1 font-sans text-xs text-white/80 sm:text-sm">{selected.tagline}</p>
+                <div className="mt-2 grid gap-1">
+                  <StatBar label="SPD" value={selected.stats.speed} />
+                  <StatBar label="ACC" value={selected.stats.accel} />
+                  <StatBar label="HND" value={selected.stats.handling} />
+                </div>
+              </div>
+            </div>
+
+            <PixelButton onClick={onStart} className="mt-6 animate-pulse text-base sm:text-lg landscape:mt-4">
+              RACE AS {selected.first.toUpperCase()}
             </PixelButton>
-            <div className="mt-8 grid gap-1 font-sans text-xs text-white/75 sm:text-sm landscape:mt-4">
+            {rivals.length > 0 && (
+              <p className="mt-4 text-[8px] leading-relaxed text-white/70 sm:text-[9px]">
+                ON THE GRID: {rivals.map((r) => r.first.toUpperCase()).join(" · ")}
+              </p>
+            )}
+
+            <div className="mt-6 grid gap-1 font-sans text-xs text-white/75 sm:text-sm landscape:mt-4">
               {isTouch ? (
                 <>
                   <p>Slide the left pad to steer · hold GAS to go</p>
@@ -185,7 +276,7 @@ export function Hud({
             </div>
             <Link
               href="/"
-              className="mt-8 inline-flex items-center gap-2 font-sans text-sm text-white/70 underline-offset-4 hover:text-white hover:underline landscape:mt-4"
+              className="mt-6 inline-flex items-center gap-2 font-sans text-sm text-white/70 underline-offset-4 hover:text-white hover:underline landscape:mt-4"
             >
               <ArrowLeft className="size-4" /> Back to the site
             </Link>
@@ -197,41 +288,48 @@ export function Hud({
       {state.phase === "finished" && state.results && (
         <div className="pointer-events-auto absolute inset-0 flex overflow-y-auto bg-black/45 backdrop-blur-[2px] touch-pan-y">
           <div className="m-auto flex w-full flex-col items-center px-6 py-8 text-center landscape:py-4">
-          <h2 className={cn("text-3xl text-yellow-300 sm:text-5xl landscape:text-2xl landscape:sm:text-4xl", shadow)}>
-            {state.position === 1 ? "YOU WIN!" : "FINISH!"}
-          </h2>
-          <p className={cn("mt-3 text-sm sm:text-base landscape:mt-2", shadow)}>
-            {pos.n}
-            {pos.suffix} PLACE · {formatTime(state.time)}
-          </p>
-          <ul className="mt-6 w-full max-w-xs space-y-2 text-left text-[10px] sm:text-xs landscape:mt-3 landscape:space-y-1">
-            {state.results.map((r) => (
-              <li
-                key={r.name}
-                className={cn(
-                  "flex items-center gap-3 rounded-md border-2 border-black/60 px-3 py-2",
-                  r.isPlayer ? "bg-white/25" : "bg-black/30"
-                )}
-              >
-                <span className="w-6">{r.position}.</span>
-                <span className="size-4 shrink-0 border-2 border-black/60" style={{ background: r.color }} />
-                <span className="flex-1 truncate">{r.name}</span>
-                <span className="tabular-nums">{r.time === null ? "—" : formatTime(r.time)}</span>
-              </li>
-            ))}
-          </ul>
-          {state.bestLap !== null && (
-            <p className="mt-4 text-[10px] text-white/70 sm:text-xs landscape:mt-2">BEST LAP {formatTime(state.bestLap)}</p>
-          )}
-          <PixelButton onClick={onRestart} className="mt-6 landscape:mt-3">
-            RACE AGAIN
-          </PixelButton>
-          <Link
-            href="/"
-            className="mt-6 inline-flex items-center gap-2 font-sans text-sm text-white/70 underline-offset-4 hover:text-white hover:underline landscape:mt-3"
-          >
-            <ArrowLeft className="size-4" /> Back to the site
-          </Link>
+            <h2 className={cn("text-3xl text-yellow-300 sm:text-5xl landscape:text-2xl landscape:sm:text-4xl", shadow)}>
+              {state.position === 1 ? "YOU WIN!" : "FINISH!"}
+            </h2>
+            <p className={cn("mt-3 text-sm sm:text-base landscape:mt-2", shadow)}>
+              {pos.n}
+              {pos.suffix} PLACE · {formatTime(state.time)}
+            </p>
+            <ul className="mt-6 w-full max-w-xs space-y-2 text-left text-[10px] sm:text-xs landscape:mt-3 landscape:space-y-1">
+              {state.results.map((r) => (
+                <li
+                  key={r.id}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md border-2 border-black/60 px-3 py-2",
+                    r.isPlayer ? "bg-white/25" : "bg-black/30"
+                  )}
+                >
+                  <span className="w-6">{r.position}.</span>
+                  <Face c={characterById(r.id)} className="size-6" />
+                  <span className="size-3 shrink-0 border-2 border-black/60" style={{ background: r.color }} />
+                  <span className="flex-1 truncate">
+                    {r.name}
+                    {r.isPlayer && <span className="ml-1 text-yellow-200">(YOU)</span>}
+                  </span>
+                  <span className="tabular-nums">{r.time === null ? "—" : formatTime(r.time)}</span>
+                </li>
+              ))}
+            </ul>
+            {state.bestLap !== null && (
+              <p className="mt-4 text-[10px] text-white/70 sm:text-xs landscape:mt-2">BEST LAP {formatTime(state.bestLap)}</p>
+            )}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 landscape:mt-3">
+              <PixelButton onClick={onRestart}>RACE AGAIN</PixelButton>
+              <PixelButton onClick={onChangeDriver} className="bg-black/50 text-xs">
+                CHANGE DRIVER
+              </PixelButton>
+            </div>
+            <Link
+              href="/"
+              className="mt-6 inline-flex items-center gap-2 font-sans text-sm text-white/70 underline-offset-4 hover:text-white hover:underline landscape:mt-3"
+            >
+              <ArrowLeft className="size-4" /> Back to the site
+            </Link>
           </div>
         </div>
       )}

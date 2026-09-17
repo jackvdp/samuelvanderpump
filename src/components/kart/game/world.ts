@@ -20,6 +20,14 @@ export const B = {
   BEDROCK: 14,
   FLOWER: 15,
   ROAD_LINE: 16,
+  HOUSE_WHITE: 17,
+  HOUSE_PINK: 18,
+  HOUSE_BLUE: 19,
+  HOUSE_YELLOW: 20,
+  HOUSE_MINT: 21,
+  WINDOW: 22,
+  DOOR: 23,
+  ROOF: 24,
 } as const;
 
 // [top, bottom, side] atlas tiles per block id
@@ -40,6 +48,14 @@ const FACE_TILES: Record<number, [number, number, number]> = {
   [B.BEDROCK]: [T.BEDROCK, T.BEDROCK, T.BEDROCK],
   [B.FLOWER]: [T.FLOWER, T.DIRT, T.GRASS_SIDE],
   [B.ROAD_LINE]: [T.ROAD_LINE, T.STONE, T.STONE],
+  [B.HOUSE_WHITE]: [T.STUCCO_WHITE, T.STUCCO_WHITE, T.STUCCO_WHITE],
+  [B.HOUSE_PINK]: [T.STUCCO_PINK, T.STUCCO_PINK, T.STUCCO_PINK],
+  [B.HOUSE_BLUE]: [T.STUCCO_BLUE, T.STUCCO_BLUE, T.STUCCO_BLUE],
+  [B.HOUSE_YELLOW]: [T.STUCCO_YELLOW, T.STUCCO_YELLOW, T.STUCCO_YELLOW],
+  [B.HOUSE_MINT]: [T.STUCCO_MINT, T.STUCCO_MINT, T.STUCCO_MINT],
+  [B.WINDOW]: [T.STUCCO_WHITE, T.STUCCO_WHITE, T.WINDOW],
+  [B.DOOR]: [T.STUCCO_WHITE, T.STUCCO_WHITE, T.DOOR],
+  [B.ROOF]: [T.ROOF, T.ROOF, T.ROOF],
 };
 
 export const WORLD_SIZE = 144;
@@ -215,6 +231,62 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
     }
   }
 
+  // --- townhouse plots: chosen before the columns are filled so each plot
+  // (and a strip of garden around it) can be levelled to race height ---
+  const treeMark = new Uint8Array(cols);
+  const HOUSE_W = 5; // square footprint
+  const HOUSE_H = 6; // storeys of wall, flat roof on top
+  const MAX_HOUSES = 16;
+  const houseSites: { gx: number; gz: number; frontX: number; frontZ: number; wall: number }[] = [];
+  {
+    const WALLS = [B.HOUSE_WHITE, B.HOUSE_PINK, B.HOUSE_BLUE, B.HOUSE_YELLOW, B.HOUSE_MINT, B.HOUSE_WHITE];
+    const hrand = mulberry32(9001);
+    const W = HOUSE_W;
+    for (let gx = 3; gx < size - 3 - W && houseSites.length < MAX_HOUSES; gx++) {
+      for (let gz = 3; gz < size - 3 - W && houseSites.length < MAX_HOUSES; gz++) {
+        if (hash2(gx, gz, 33) > 0.12) continue;
+        // gentle ground, no water, close to the road but off the racing line
+        let ok = true;
+        for (let ax = -2; ax <= W + 1 && ok; ax++) {
+          for (let az = -2; az <= W + 1; az++) {
+            const ci = (gx + ax) * size + gz + az;
+            const inside = ax >= 0 && ax < W && az >= 0 && az < W;
+            if (
+              surface[ci] < 0 ||
+              surface[ci] > 3 ||
+              treeMark[ci] ||
+              topBlock[ci] === B.WATER ||
+              dist[ci] < halfW + (inside ? 7 : 4)
+            ) {
+              ok = false;
+              break;
+            }
+          }
+        }
+        if (!ok) continue;
+        for (let ax = -2; ax <= W + 1; ax++) {
+          for (let az = -2; az <= W + 1; az++) {
+            const ci = (gx + ax) * size + gz + az;
+            surface[ci] = 0;
+            drivable[ci] = 1;
+            if (topBlock[ci] !== B.FLOWER) topBlock[ci] = B.GRASS;
+            treeMark[ci] = 1;
+          }
+        }
+        // front door on the side facing the road
+        const mid = Math.floor(W / 2);
+        const sides = [
+          { d: dist[(gx - 1) * size + gz + mid], x: 0, z: mid },
+          { d: dist[(gx + W) * size + gz + mid], x: W - 1, z: mid },
+          { d: dist[(gx + mid) * size + gz - 1], x: mid, z: 0 },
+          { d: dist[(gx + mid) * size + gz + W], x: mid, z: W - 1 },
+        ];
+        const front = sides.reduce((a, b) => (b.d < a.d ? b : a));
+        houseSites.push({ gx, gz, frontX: front.x, frontZ: front.z, wall: WALLS[Math.floor(hrand() * WALLS.length)] });
+      }
+    }
+  }
+
   // --- fill columns ---
   for (let gx = 0; gx < size; gx++) {
     for (let gz = 0; gz < size; gz++) {
@@ -236,9 +308,31 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
     }
   }
 
+  // --- Chelsea townhouses: pastel stucco terraces on their levelled plots ---
+  for (const site of houseSites) {
+    const { gx, gz, wall } = site;
+    for (let ax = 0; ax < HOUSE_W; ax++) {
+      for (let az = 0; az < HOUSE_W; az++) {
+        const edgeX = ax === 0 || ax === HOUSE_W - 1;
+        const edgeZ = az === 0 || az === HOUSE_W - 1;
+        const corner = edgeX && edgeZ;
+        const windowCol = !corner && (edgeX ? az % 2 === 1 : edgeZ ? ax % 2 === 1 : false);
+        for (let y = 0; y < HOUSE_H; y++) {
+          let b: number = wall;
+          if (windowCol && y % 2 === 1) b = B.WINDOW;
+          if (ax === site.frontX && az === site.frontZ && y <= 1) b = B.DOOR;
+          set(gx + ax, y, gz + az, b);
+        }
+        set(gx + ax, HOUSE_H, gz + az, B.ROOF);
+        const ci = (gx + ax) * size + gz + az;
+        drivable[ci] = 0;
+        topBlock[ci] = wall;
+      }
+    }
+  }
+
   // --- trees ---
   const rand = mulberry32(4242);
-  const treeMark = new Uint8Array(cols);
   for (let gx = 2; gx < size - 2; gx++) {
     for (let gz = 2; gz < size - 2; gz++) {
       const ci = gx * size + gz;
