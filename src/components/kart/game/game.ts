@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { buildAtlas } from "./textures";
 import { buildTrack, DECK_MIN, type Track } from "./track";
-import { buildWorld, B, type World } from "./world";
+import { buildWorld, B, WORLD_X, WORLD_Z, type World } from "./world";
 import { buildKart, disposeSharedKartGeometry, type KartModel } from "./kart-model";
 import { createChannel, mergeInput, KeyboardInput, type InputChannel } from "./input";
 import { GameAudio } from "./audio";
@@ -82,8 +82,8 @@ type Kart = {
 };
 
 const TOTAL_LAPS = 3;
-const TOP_SPEED = 24;
-const BOOST_SPEED = 34;
+const TOP_SPEED = 22.5;
+const BOOST_SPEED = 32;
 const BOOST_TIME = 1.5;
 const ACCEL = 13;
 const BRAKE = 30;
@@ -279,7 +279,7 @@ export class KartGame {
     for (let i = 0; i < 16; i++) {
       const m = new THREE.Mesh(this.cloudGeo, this.cloudMat);
       m.scale.set(6 + Math.random() * 12, 1.2, 4 + Math.random() * 8);
-      m.position.set((Math.random() - 0.5) * 220, 24 + Math.random() * 8, (Math.random() - 0.5) * 220);
+      m.position.set((Math.random() - 0.5) * (WORLD_X + 60), 24 + Math.random() * 8, (Math.random() - 0.5) * (WORLD_Z + 80));
       this.scene.add(m);
       this.clouds.push(m);
     }
@@ -860,16 +860,23 @@ export class KartGame {
       return;
     }
 
-    const lookahead = Math.round((5 + absSpeed * 0.45) * 2);
-    const target = this.track.samples[(k.trackIdx + lookahead) % n];
-    const lane = 2.2 * Math.sin(this.raceTime * 0.3 + ai.phase);
+    // aim at a point down the road; look less far ahead where the track
+    // bends hard so hairpins are not cut across the grass
+    const far = this.track.samples[(k.trackIdx + 24) % n];
+    const near = this.track.samples[k.trackIdx];
+    const bend = Math.abs(wrapAngle(Math.atan2(far.tx, far.tz) - Math.atan2(near.tx, near.tz)));
+    const lookahead = Math.round((4 + absSpeed * 0.4) * 2 * (1 - 0.5 * Math.min(1, bend / 1.6)));
+    const target = this.track.samples[(k.trackIdx + Math.max(6, lookahead)) % n];
+    const lane = 1.5 * Math.sin(this.raceTime * 0.3 + ai.phase) * (1 - 0.7 * Math.min(1, bend / 1.6));
     const tx = target.x - target.tz * lane;
     const tz = target.z + target.tx * lane;
     const desired = Math.atan2(tx - k.x, tz - k.z);
     const diff = wrapAngle(desired - k.heading);
     inp.steer = Math.max(-1, Math.min(1, -diff * 2.6));
     inp.throttle = 1;
-    inp.brake = Math.abs(diff) > 1.1 && absSpeed > 13 ? 1 : 0;
+    // brake into the tight stuff: a sharp bend coming up, or the nose already
+    // pointing well off the line at speed
+    inp.brake = (Math.abs(diff) > 0.9 && absSpeed > 11) || (bend > 1.3 && absSpeed > 15) ? 1 : 0;
     inp.drift = ai.skill > 0.9 && Math.abs(diff) > 0.45 && absSpeed > 12 && !k.offroad;
   }
 
@@ -898,7 +905,7 @@ export class KartGame {
     }
     for (const c of this.clouds) {
       c.position.x += dt * 1.2;
-      if (c.position.x > 120) c.position.x = -120;
+      if (c.position.x > WORLD_X / 2 + 30) c.position.x = -WORLD_X / 2 - 30;
     }
   }
 
