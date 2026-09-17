@@ -227,6 +227,9 @@ export function Hud({
               CHELSEA
               <br className="landscape:hidden" /> KART
             </h1>
+            <p className="mt-3 max-w-md font-sans text-xs text-white/80 sm:text-sm landscape:mt-2">
+              Three laps of a blocky PFI: under the bridge, round the Bowl, through the esses and back over the flyover.
+            </p>
             <p className="mt-4 text-[9px] tracking-widest text-white/80 sm:text-[10px] landscape:mt-2">PICK YOUR DRIVER</p>
 
             <div className="mt-3 grid w-full grid-cols-5 gap-1.5 sm:gap-2">

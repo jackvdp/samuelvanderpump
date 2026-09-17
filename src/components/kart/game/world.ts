@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { T, tileUV, mulberry32 } from "./textures";
-import { BOOST_PADS, type Track } from "./track";
+import { BOOST_PADS, DECK_MIN, type Track } from "./track";
 
 export const B = {
   AIR: 0,
@@ -137,12 +137,18 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
     voxels[vIndex(gx, y, gz)] = b;
   };
 
-  // --- distance field to the track centre line ---
+  // --- distance fields to the track centre line ---
+  // `dist` counts every sample (it keeps terrain, trees and houses clear of
+  // the flyover); `distG` counts only ground-level samples and is what the
+  // road itself is rasterised from, so the ground under the bridge is grass
+  // unless the lower pass runs through it.
   const dist = new Float32Array(cols).fill(Infinity);
+  const distG = new Float32Array(cols).fill(Infinity);
   const nearIdx = new Int32Array(cols);
   const R = halfW + 3;
   for (let i = 0; i < track.count; i++) {
     const s = track.samples[i];
+    const ground = s.y < DECK_MIN + 0.2;
     const gxc = s.x - x0;
     const gzc = s.z - z0;
     const gxa = Math.max(0, Math.floor(gxc - R));
@@ -155,8 +161,9 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
         const dz = gz + 0.5 - gzc;
         const d = Math.sqrt(dx * dx + dz * dz);
         const ci = gx * size + gz;
-        if (d < dist[ci]) {
-          dist[ci] = d;
+        if (d < dist[ci]) dist[ci] = d;
+        if (ground && d < distG[ci]) {
+          distG[ci] = d;
           nearIdx[ci] = i;
         }
       }
@@ -175,7 +182,7 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
   for (let gx = 0; gx < size; gx++) {
     for (let gz = 0; gz < size; gz++) {
       const ci = gx * size + gz;
-      const d = dist[ci];
+      const d = distG[ci];
       const wx = gx + x0 + 0.5;
       const wz = gz + z0 + 0.5;
       let top: number = B.GRASS;
@@ -197,7 +204,8 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
         const sample = track.samples[nearIdx[ci]];
         top = Math.floor(sample.s / 2) % 2 === 0 ? B.KERB_RED : B.KERB_WHITE;
       } else {
-        const f = d === Infinity ? 1 : smoothstep((d - (halfW + 2.5)) / 9);
+        const dAll = dist[ci];
+        const f = dAll === Infinity ? 1 : smoothstep((dAll - (halfW + 2.5)) / 9);
         const n = valueNoise(wx, wz, 7);
         const hN = Math.round(n * 5.5 * f);
         if (hN >= 1) {
@@ -367,6 +375,38 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
     }
   }
 
+  // --- flyover supports: an earth bank where the deck is low, pillars once
+  // there is room to drive underneath ---
+  {
+    const deckIdx: number[] = [];
+    for (let i = 0; i < track.count; i++) if (track.samples[i].y > 0.03) deckIdx.push(i);
+    const support = (px: number, pz: number, topY: number, block: number) => {
+      const gx = Math.floor(px - x0);
+      const gz = Math.floor(pz - z0);
+      if (gx < 0 || gz < 0 || gx >= size || gz >= size) return;
+      const ci = gx * size + gz;
+      if (distG[ci] < halfW + 1.2) return; // never block the road below
+      for (let y = 0; y <= topY; y++) set(gx, y, gz, block);
+      drivable[ci] = 0;
+    };
+    for (const i of deckIdx) {
+      const s = track.samples[i];
+      const nx = -s.tz;
+      const nz = s.tx;
+      const bottom = s.y - 0.8;
+      const topY = Math.ceil(bottom) - 1;
+      if (topY < 0) continue;
+      if (s.y < 3) {
+        // too low to pass under: solid bank across the full deck width
+        for (let lat = -halfW - 0.5; lat <= halfW + 0.5; lat += 0.5)
+          support(s.x + nx * lat, s.z + nz * lat, topY, B.DIRT);
+      } else if (i % 8 === 0) {
+        support(s.x + nx * (halfW + 0.2), s.z + nz * (halfW + 0.2), topY, B.STONE);
+        support(s.x - nx * (halfW + 0.2), s.z - nz * (halfW + 0.2), topY, B.STONE);
+      }
+    }
+  }
+
   // --- start/finish gantry ---
   {
     const s0 = track.samples[0];
@@ -497,6 +537,70 @@ export function buildWorld(track: Track, atlas: THREE.Texture): World {
       const mesh = new THREE.Mesh(geo, material);
       mesh.frustumCulled = true;
       group.add(mesh);
+    }
+  }
+
+  // --- the flyover deck: a smooth ribbon along the elevated samples, with a
+  // slab underneath and a low barrier either side ---
+  {
+    const hw = halfW;
+    const pos: number[] = [];
+    const uvs: number[] = [];
+    const col: number[] = [];
+    const idx: number[] = [];
+    let vcount = 0;
+    const at = (s: (typeof track.samples)[number], lat: number, dy: number): [number, number, number] => [
+      s.x - s.tz * lat,
+      s.y + dy,
+      s.z + s.tx * lat,
+    ];
+    // one quad per segment between (latA, dyA) and (latB, dyB) across the deck
+    const strip = (i: number, latA: number, dyA: number, latB: number, dyB: number, tile: number, shade: number) => {
+      const a = track.samples[i];
+      const b = track.samples[(i + 1) % track.count];
+      const [u0, v0, u1, v1] = tileUV(tile);
+      // walk the 16px tile in quarter slices so the texture tiles seamlessly
+      const q = i % 4;
+      const ua = u0 + (u1 - u0) * (q / 4);
+      const ub = u0 + (u1 - u0) * ((q + 1) / 4);
+      const verts = [at(a, latA, dyA), at(a, latB, dyB), at(b, latB, dyB), at(b, latA, dyA)];
+      const uv = [
+        [ua, v0],
+        [ua, v1],
+        [ub, v1],
+        [ub, v0],
+      ];
+      for (let k = 0; k < 4; k++) {
+        pos.push(...verts[k]);
+        uvs.push(uv[k][0], uv[k][1]);
+        col.push(shade, shade, shade);
+      }
+      idx.push(vcount, vcount + 2, vcount + 1, vcount, vcount + 3, vcount + 2);
+      vcount += 4;
+    };
+    for (let i = 0; i < track.count; i++) {
+      const a = track.samples[i];
+      const b = track.samples[(i + 1) % track.count];
+      if (a.y <= 0.03 && b.y <= 0.03) continue;
+      strip(i, -hw, 0, hw, 0, T.ROAD, 1); // deck
+      strip(i, -hw - 0.5, 0.7, -hw, 0.7, T.KERB_WHITE, 0.95); // barrier tops
+      strip(i, hw, 0.7, hw + 0.5, 0.7, T.KERB_WHITE, 0.95);
+      strip(i, -hw, 0.7, -hw, 0, T.KERB_RED, 0.7); // barrier inner faces
+      strip(i, hw, 0, hw, 0.7, T.KERB_RED, 0.7);
+      strip(i, -hw - 0.5, -0.8, -hw - 0.5, 0.7, T.STONE, 0.64); // outer faces
+      strip(i, hw + 0.5, 0.7, hw + 0.5, -0.8, T.STONE, 0.64);
+      strip(i, hw + 0.5, -0.8, -hw - 0.5, -0.8, T.STONE, 0.5); // underside
+    }
+    if (vcount > 0) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      geo.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+      geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+      geo.setIndex(idx);
+      geo.computeBoundingSphere();
+      geometries.push(geo);
+      const deck = new THREE.Mesh(geo, material);
+      group.add(deck);
     }
   }
 

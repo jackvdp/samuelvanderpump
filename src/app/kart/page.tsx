@@ -11,7 +11,7 @@ const pixel = Press_Start_2P({
 export const metadata: Metadata = {
   title: "Chelsea Kart | Samuel Vanderpump",
   description:
-    "Race as the Made in Chelsea cast in a blocky kart racer you can play in the browser — on your phone or desktop. Pick your driver, three laps, one very square Chelsea.",
+    "Race as the Made in Chelsea cast around a blocky PFI, the Lincolnshire kart circuit, bridge and all — on your phone or desktop. Pick your driver and go three laps.",
   openGraph: {
     title: "Chelsea Kart | Samuel Vanderpump",
     description: "Pick a Made in Chelsea cast member and race three laps, right in your browser.",
